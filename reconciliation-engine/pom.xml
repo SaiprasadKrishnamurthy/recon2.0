@@ -147,7 +147,9 @@
                         <configuration>
                             <dockerImageNamespace>${docker.image.namespace}/${docker.image.prefix}
                             </dockerImageNamespace>
-                            <deploymentYmlTemplateFilesDir>reconciliation-engine/deployment</deploymentYmlTemplateFilesDir>
+                            <deploymentYmlTemplateFilesDir>reconciliation-engine/deployment
+                            </deploymentYmlTemplateFilesDir>
+                            <outputDir>reconciliation-engine/target/manifests/k8s</outputDir>
                         </configuration>
                     </execution>
                 </executions>
