@@ -5,6 +5,7 @@ metadata:
   labels:
     app: ${serviceName}
 spec:
+  type: NodePort
   ports:
     - port: ${server.port}
       protocol: TCP

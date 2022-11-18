@@ -2,3 +2,7 @@
 kubectl apply -f `pwd`/reconciliation-engine/target/manifests/k8s/reconciliation-engine/nats-deployment.yml
 kubectl apply -f `pwd`/reconciliation-engine/target/manifests/k8s/reconciliation-engine/configMap_k8s.yml
 kubectl apply -f `pwd`/reconciliation-engine/target/manifests/k8s/reconciliation-engine/service-deployment_k8s.yml
+kubectl apply -f `pwd`/reconciliation-engine-ui/target/manifests/k8s/reconciliation-engine-ui/configMap_k8s.yml
+kubectl apply -f `pwd`/reconciliation-engine-ui/target/manifests/k8s/reconciliation-engine-ui/service-deployment_k8s.yml
+
+minikube service reconciliation-engine-ui --url
