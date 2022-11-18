@@ -33,6 +33,7 @@ class TriggerResource(
             reconSettingVersion = 1L,
             streamResults = true
         )
+        println(" ----- >$reconTriggerSubject <--------")
         connection.jetStream().publish(
             reconTriggerSubject,
             jacksonObjectMapper().writeValueAsBytes(r)

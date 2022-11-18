@@ -20,7 +20,8 @@ import org.springframework.messaging.simp.SimpMessagingTemplate
 class NatsConsumerConfig(
     private val connection: Connection,
     private val websocket: SimpMessagingTemplate,
-    @Value("\${reconStreamName}") private val reconStreamName: String
+    @Value("\${reconStreamName}") private val reconStreamName: String,
+    @Value("\${reconTriggerSubject}") private val reconTriggerSubject: String
 ) {
 
     val jacksonObjectMapper = jacksonObjectMapper()
@@ -48,6 +49,7 @@ class NatsConsumerConfig(
                 StreamConfiguration.Builder()
                     .name(reconStreamName)
                     .addSubjects(
+                        reconTriggerSubject,
                         "taxreco.reconresult",
                         "taxreco.progress"
                     )
@@ -58,6 +60,7 @@ class NatsConsumerConfig(
                 StreamConfiguration.Builder()
                     .name(reconStreamName)
                     .addSubjects(
+                        reconTriggerSubject,
                         "taxreco.reconresult",
                         "taxreco.progress"
                     )
