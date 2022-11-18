@@ -1,0 +1,30 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: "reconciliation-engine-0.0.1-snapshot"
+  namespace: default
+data:
+  nats_server: "nats://nats:4222"
+  artifactId: "reconciliation-engine"
+  random: "81959d48-2e0a-4e36-b40a-79360fb91704"
+  version: "0.0.1-SNAPSHOT"
+  gitVersion: "88f7d1ec3991891cb233b5106de6316ae68bf059"
+  configMapTemplateName: "reconciliation-engine-0.0.1-snapshot"
+  imageName: "docker.io/saiprasadkrishnamurthy/reconciliation-engine"
+  replicas: "1"
+  minReadySeconds: "60"
+  recon_trigger_listener_poll_frequency_millis: "1000"
+  reconTriggerSubjectDurable: "dev2-reconciliation-trigger-main"
+  queueCapacity: "11"
+  serviceName: "reconciliation-engine"
+  default_tenant: "taxreco"
+  server_port: "18080"
+  corePoolSize: "8"
+  reconTriggerSubject: "dev2.reconciliation.trigger.main"
+  mongodb_uri: "mongodb+srv://sai:sai@cluster1.khkphay.mongodb.net/?retryWrites=true&w=majority"
+  maxPoolSize: "42"
+  recon_bucket_trigger_listener_poll_frequency_millis: "500"
+  reconBucketTriggerSubject: "dev2.reconciliation.trigger.bucket"
+  reconBucketTriggerSubjectDurable: "dev2-reconciliation-trigger-bucket"
+  reconStreamName: "dev2_recon_consumer_stream"
+

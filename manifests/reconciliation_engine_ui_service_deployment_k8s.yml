@@ -1,0 +1,39 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: reconciliation-engine-ui
+  labels:
+    app: reconciliation-engine-ui
+spec:
+  type: NodePort
+  ports:
+    - port: 28080
+      protocol: TCP
+      targetPort: 28080
+  selector:
+    app: reconciliation-engine-ui
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: reconciliation-engine-ui
+spec:
+  selector:
+    matchLabels:
+      app: reconciliation-engine-ui
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: reconciliation-engine-ui
+    spec:
+      containers:
+        - name: reconciliation-engine-ui
+          image: docker.io/saiprasadkrishnamurthy/reconciliation-engine-ui:0.0.1-SNAPSHOT
+          imagePullPolicy: Always
+          envFrom:
+            - configMapRef:
+                name: reconciliation-engine-ui-0.0.1-snapshot
+          ports:
+            - containerPort: 28080
+

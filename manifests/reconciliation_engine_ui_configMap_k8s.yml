@@ -1,0 +1,21 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: "reconciliation-engine-ui-0.0.1-snapshot"
+  namespace: default
+data:
+  nats_server: "nats://nats:4222"
+  artifactId: "reconciliation-engine-ui"
+  random: "9bd8f0fd-f684-47ae-962e-f2cb1c6e93f1"
+  version: "0.0.1-SNAPSHOT"
+  gitVersion: "88f7d1ec3991891cb233b5106de6316ae68bf059"
+  configMapTemplateName: "reconciliation-engine-ui-0.0.1-snapshot"
+  imageName: "docker.io/saiprasadkrishnamurthy/reconciliation-engine-ui"
+  replicas: "1"
+  minReadySeconds: "60"
+  server_servlet_contextpath: "/reconciliation-engine-ui"
+  server_port: "28080"
+  reconTriggerSubject: "dev2.reconciliation.trigger.main"
+  serviceName: "reconciliation-engine-ui"
+  mongodb_uri: "mongodb+srv://sai:sai@cluster1.khkphay.mongodb.net/?retryWrites=true&w=majority"
+

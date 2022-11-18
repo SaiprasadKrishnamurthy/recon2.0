@@ -1,0 +1,9 @@
+#!/bin/bash
+
+cp ./reconciliation-engine/target/manifests/k8s/reconciliation-engine/nats-deployment.yml ./manifests/
+cp ./reconciliation-engine/target/manifests/k8s/reconciliation-engine/configMap_k8s.yml ./manifests/reconciliation_engine_configMap_k8s.yml
+cp ./reconciliation-engine/target/manifests/k8s/reconciliation-engine/service-deployment_k8s.yml ./manifests/reconciliation_engine_service_deployment_k8s.yml
+
+cp ./reconciliation-engine-ui/target/manifests/k8s/reconciliation-engine-ui/configMap_k8s.yml ./manifests/reconciliation_engine_ui_configMap_k8s.yml
+cp ./reconciliation-engine-ui/target/manifests/k8s/reconciliation-engine-ui/service-deployment_k8s.yml ./manifests/reconciliation_engine_ui_service_deployment_k8s.yml
+

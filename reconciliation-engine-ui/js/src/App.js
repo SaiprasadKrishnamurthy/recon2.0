@@ -5,7 +5,6 @@ import { AppFooter } from "./AppFooter";
 import { AppMenu } from "./AppMenu";
 import { AppProfile } from "./AppProfile";
 import { Route } from "react-router-dom";
-import { Docs } from "./components/Docs";
 import "primereact/resources/themes/nova-light/theme.css";
 import "primereact/resources/primereact.min.css";
 import "primeicons/primeicons.css";
@@ -15,12 +14,8 @@ import "@fullcalendar/daygrid/main.css";
 import "@fullcalendar/timegrid/main.css";
 import "./layout/layout.scss";
 import "./App.scss";
-import { ApiKey } from "./components/ApiKey";
-import { NewTemplate } from "./components/NewTemplate";
-import { ListTemplates } from "./components/ListTemplates";
-import { LiveStream } from "./components/LiveStream";
 import { Home } from "./components/Home";
-import { UpdateTemplate } from "./components/UpdateTemplate";
+import { Docs } from "./components/Docs";
 
 class App extends Component {
   constructor() {
@@ -99,6 +94,13 @@ class App extends Component {
         command: () => {
           window.location = "#/";
         }
+      },
+      {
+        label: "Help",
+        icon: "pi pi-fw pi-question-circle",
+        command: () => {
+          window.location = "#/docs";
+        }
       }
     ];
   }
@@ -174,6 +176,7 @@ class App extends Component {
 
         <div className="layout-main">
           <Route path="/" exact component={Home} />
+          <Route path="/docs" exact component={Docs} />
         </div>
 
         <AppFooter />
