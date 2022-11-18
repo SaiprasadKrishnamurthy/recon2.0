@@ -1,0 +1,11 @@
+#!/bin/bash
+
+brew install watch
+
+kubectl apply -f https://raw.githubusercontent.com/SaiprasadKrishnamurthy/recon2.0/main/manifests/nats-deployment.yml
+kubectl apply -f https://raw.githubusercontent.com/SaiprasadKrishnamurthy/recon2.0/main/manifests/reconciliation_engine_configMap_k8s.yml
+kubectl apply -f https://raw.githubusercontent.com/SaiprasadKrishnamurthy/recon2.0/main/manifests/reconciliation_engine_service_deployment_k8s.yml
+kubectl apply -f https://raw.githubusercontent.com/SaiprasadKrishnamurthy/recon2.0/main/manifests/reconciliation_engine_ui_configMap_k8s.yml
+kubectl apply -f https://raw.githubusercontent.com/SaiprasadKrishnamurthy/recon2.0/main/manifests/reconciliation_engine_ui_service_deployment_k8s.yml
+
+watch -n 1 kubectl get pods -o wide
