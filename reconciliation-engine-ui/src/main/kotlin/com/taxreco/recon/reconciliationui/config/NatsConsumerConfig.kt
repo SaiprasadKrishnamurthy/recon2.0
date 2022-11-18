@@ -8,8 +8,10 @@ import com.taxreco.recon.reconciliationui.model.ReconciliationJobProgressEvent
 import io.nats.client.Connection
 import io.nats.client.Message
 import io.nats.client.PushSubscribeOptions
+import io.nats.client.api.StreamConfiguration
 import jakarta.annotation.PostConstruct
 import org.slf4j.LoggerFactory
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Configuration
 import org.springframework.messaging.simp.SimpMessagingTemplate
 
@@ -17,7 +19,8 @@ import org.springframework.messaging.simp.SimpMessagingTemplate
 @Configuration
 class NatsConsumerConfig(
     private val connection: Connection,
-    private val websocket: SimpMessagingTemplate
+    private val websocket: SimpMessagingTemplate,
+    @Value("\${reconStreamName}") private val reconStreamName: String
 ) {
 
     val jacksonObjectMapper = jacksonObjectMapper()
@@ -30,12 +33,37 @@ class NatsConsumerConfig(
 
     @PostConstruct
     fun setup() {
+        init()
         reconResultSubscriber()
         reconProgressSubscriber()
     }
 
     private fun formatMap(map: Map<String, Any>): String {
         return map.map { it.key + " = " + it.value.toString() }.joinToString(",  ")
+    }
+
+    private fun init() {
+        try {
+            connection.jetStreamManagement().addStream(
+                StreamConfiguration.Builder()
+                    .name(reconStreamName)
+                    .addSubjects(
+                        "taxreco.reconresult",
+                        "taxreco.progress"
+                    )
+                    .build()
+            )
+        } catch (ex: Exception) {
+            connection.jetStreamManagement().updateStream(
+                StreamConfiguration.Builder()
+                    .name(reconStreamName)
+                    .addSubjects(
+                        "taxreco.reconresult",
+                        "taxreco.progress"
+                    )
+                    .build()
+            )
+        }
     }
 
     private fun reconResultSubscriber() {

@@ -6,9 +6,9 @@ metadata:
 data:
   nats_server: "nats://nats:4222"
   artifactId: "reconciliation-engine-ui"
-  random: "e6a6b77b-ec4f-4298-9a36-493a25acaf22"
+  random: "39be10af-f5aa-4396-a3fe-c5934a5fd8f1"
   version: "0.0.1-SNAPSHOT"
-  gitVersion: "0aa54c2f55ec2523d5bcc4283c28e096f0ba5688"
+  gitVersion: "4d52ad48b54a3559d730f39f4a3d252fb07089bc"
   configMapTemplateName: "reconciliation-engine-ui-0.0.1-snapshot"
   imageName: "docker.io/saiprasadkrishnamurthy/reconciliation-engine-ui"
   replicas: "1"
@@ -18,4 +18,5 @@ data:
   reconTriggerSubject: "dev2.reconciliation.trigger.main"
   serviceName: "reconciliation-engine-ui"
   mongodb_uri: "mongodb+srv://sai:sai@cluster1.khkphay.mongodb.net/?retryWrites=true&w=majority"
+  reconStreamName: "dev2_recon_consumer_stream"
 
