@@ -1,0 +1,61 @@
+{
+    "name": "reconciliation-engine-ui",
+    "version": "0.0.1-SNAPSHOT",
+    "homepage": "/reconciliation-engine-ui",
+    "private": false,
+    "license": "Taxreco",
+    "dependencies": {
+        "@fullcalendar/core": "4.0.2",
+        "@fullcalendar/daygrid": "4.0.1",
+        "@fullcalendar/interaction": "4.0.2",
+        "@fullcalendar/timegrid": "4.0.1",
+        "@sbzen/re-cron": "^1.0.6",
+        "@stomp/stompjs": "^6.1.2",
+        "axios": "^0.19.0",
+        "chart.js": "2.7.3",
+        "classnames": "^2.2.6",
+        "codemirror": "^5.48.2",
+        "javascript-terminal": "^1.1.1",
+        "node-sass": "^4.12.0",
+        "primeflex": "1.0.0-rc.1",
+        "primeicons": "1.0.0",
+        "primereact": "3.1.7",
+        "query-string": "^7.1.1",
+        "quill": "1.3.3",
+        "react": "^16.8.6",
+        "react-app-polyfill": "^1.0.1",
+        "react-codemirror2": "^6.0.0",
+        "react-console-emulator": "^5.0.2",
+        "react-cron-builder": "^1.0.4",
+        "react-dom": "^16.8.6",
+        "react-gauge-chart": "^0.4.0",
+        "react-html-parser": "^2.0.2",
+        "react-json-editor-ajrm": "^2.5.13",
+        "react-json-ide": "^2.6.0",
+        "react-json-table": "^0.1.1",
+        "react-json-to-table": "^0.1.7",
+        "react-json-view": "^1.19.1",
+        "react-json-viewer": "^2.1.0",
+        "react-markdown": "^8.0.0",
+        "react-router-dom": "^4.3.1",
+        "react-scripts": "3.0.1",
+        "react-spinners": "^0.5.13",
+        "react-terminal-component": "^1.5.0",
+        "react-transition-group": "^2.5.1"
+    },
+    "scripts": {
+        "start": "react-scripts start",
+        "build": "react-scripts build",
+        "test": "react-scripts test",
+        "eject": "react-scripts eject"
+    },
+    "eslintConfig": {
+        "extends": "react-app"
+    },
+    "browserslist": [
+        ">0.2%",
+        "not dead",
+        "not ie <= 11",
+        "not op_mini all"
+    ]
+}
