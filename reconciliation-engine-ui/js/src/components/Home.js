@@ -6,6 +6,7 @@ import Terminal from 'react-console-emulator';
 import { Client } from '@stomp/stompjs';
 import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
+import { JsonToTable } from 'react-json-to-table';
 
 
 export class Home extends Component {
@@ -21,7 +22,8 @@ export class Home extends Component {
         this.state = {
             job: { jobId: uniqueId },
             progress: { expectedCount: '', processedCount: '' },
-            matches: []
+            matches: [],
+            settings: {}
         };
     }
 
@@ -82,6 +84,19 @@ export class Home extends Component {
                 </span></b>
             </div>;
         }
+        let results = <></>;
+        let settings = <></>;
+        if (this.state.matches.length > 0) {
+            results = <DataTable value={this.state.matches}>
+                <Column style={{ width: '10%' }} field="rulesetType" header="RuleSet" sortable filter filterMatchMode='contains' />
+                <Column style={{ width: '5%' }} field="bucketValue" header="Bucket" sortable filter filterMatchMode='contains' />
+                <Column field="tagsDisplay" header="Tags" sortable filter filterMatchMode='contains' />
+                <Column header="Data" body={this.dataTemplate} />
+            </DataTable>;
+        }
+        if (this.state.settings) {
+            settings = <JsonToTable json={this.state.settings} />
+        }
         return (
             <React.Fragment>
                 <div className="card">
@@ -97,7 +112,7 @@ export class Home extends Component {
                                         description: 'Start a job',
                                         usage: 'start',
                                         fn: (...args) => {
-                                            this.setState({ progress: { expectedCount: '', processedCount: '' }, matches: [] });
+                                            this.setState({ progress: { expectedCount: '', processedCount: '' }, matches: [], settings: {} });
                                             axiosClient.post('/recon/trigger/' + this.state.job.jobId)
                                                 .then(res => {
                                                     this.setState({ job: res.data });
@@ -105,9 +120,22 @@ export class Home extends Component {
                                                     this.msgs.show({ severity: 'error', summary: 'Error', detail: 'Unable to trigger recon due to system error.', sticky: false });
                                                 });
                                         }
+                                    },
+                                    settings: {
+                                        description: 'View Recon Settings',
+                                        usage: 'settings',
+                                        fn: (...args) => {
+                                            this.setState({ progress: { expectedCount: '', processedCount: '' }, matches: [], setings: {} });
+                                            axiosClient.get('/recon/setting')
+                                                .then(res => {
+                                                    this.setState({ settings: res.data });
+                                                }).catch(err => {
+                                                    this.msgs.show({ severity: 'error', summary: 'Error', detail: 'Unable to fetch settings due to system error.', sticky: false });
+                                                });
+                                        }
                                     }
                                 }}
-                                welcomeMessage={'Welcome to Recon 2.0!\nYour session Id is: ' + this.state.job.jobId + " \n Enter start command to trigger recon 2.0\nAuthor: Sai (sai@taxreco.com)\n\n\n---------------------------------------------\n"}
+                                welcomeMessage={'Welcome to Recon 2.0!\nYour session Id is: ' + this.state.job.jobId + " \n start - command to trigger recon 2.0\nsettings - View Recon settings in the system \n Author: Sai (sai@taxreco.com)\n\n\n---------------------------------------------\n"}
                                 promptLabel={'$ '}
                             />
                         </div>
@@ -116,12 +144,8 @@ export class Home extends Component {
                     <div className="card">
                         <div className="p-grid">
                             <div className='p-col-12'>
-                                <DataTable value={this.state.matches}>
-                                    <Column style={{ width: '10%' }} field="rulesetType" header="RuleSet" sortable filter filterMatchMode='contains' />
-                                    <Column style={{ width: '5%' }} field="bucketValue" header="Bucket" sortable filter filterMatchMode='contains' />
-                                    <Column field="tagsDisplay" header="Tags" sortable filter filterMatchMode='contains' />
-                                    <Column header="Data" body={this.dataTemplate} />
-                                </DataTable>
+                                {results}
+                                {settings}
                             </div>
                         </div>
                     </div>

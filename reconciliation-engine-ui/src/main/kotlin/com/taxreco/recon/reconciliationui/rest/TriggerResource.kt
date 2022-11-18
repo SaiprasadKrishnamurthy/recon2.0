@@ -1,20 +1,20 @@
 package com.taxreco.recon.reconciliationui.rest
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import com.taxreco.recon.reconciliationui.model.ReconciliationSetting
 import com.taxreco.recon.reconciliationui.model.ReconciliationTriggeredEvent
 import io.nats.client.Connection
 import org.slf4j.LoggerFactory.getLogger
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.data.mongodb.core.MongoTemplate
 import org.springframework.http.MediaType
-import org.springframework.web.bind.annotation.PathVariable
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
 
 @RequestMapping("/api/v1/recon")
 @RestController
 class TriggerResource(
     private val connection: Connection,
+    private val mongoTemplate: MongoTemplate,
     @Value("\${reconTriggerSubject}") private val reconTriggerSubject: String
 ) {
 
@@ -39,5 +39,10 @@ class TriggerResource(
             jacksonObjectMapper().writeValueAsBytes(r)
         )
         return mapOf("jobId" to jobId)
+    }
+
+    @GetMapping("/setting", produces = [MediaType.APPLICATION_JSON_VALUE])
+    fun settings(): ReconciliationSetting {
+        return mongoTemplate.findAll(ReconciliationSetting::class.java).first { it.name == "Settings 1" }
     }
 }
