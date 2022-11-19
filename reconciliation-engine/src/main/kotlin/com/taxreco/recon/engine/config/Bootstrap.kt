@@ -108,7 +108,7 @@ class Bootstrap {
             TransactionRecord(
                 id = RecordId("1", "_26as"),
                 name = "_26as",
-                attrs = mutableMapOf("amountPaid" to 1100.0, "taxFiled" to 110.0, "invoiceNo" to "2", "entityId" to "1")
+                attrs = mutableMapOf("amountPaid" to 1100.0, "taxFiled" to 110.0, "entityId" to "1")
             ),
             TransactionRecord(
                 id = RecordId("2", "_26as"),

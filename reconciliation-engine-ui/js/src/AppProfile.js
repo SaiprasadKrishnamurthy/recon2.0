@@ -25,7 +25,8 @@ export class AppProfile extends Component {
         />
         <br /><br />
         <div>
-          <h1 style={{ color: "white" }}>Recon 2.0 client</h1>
+          <h1 style={{ color: "white" , marginLeft: "5px"}}>Recon 2.0 client</h1>
+          <h3 style={{ color: "gold", marginLeft: "20px" }}>Project Aurum</h3>
         </div>
         <br />
         <hr />

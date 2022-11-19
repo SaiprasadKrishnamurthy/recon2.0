@@ -14,7 +14,7 @@ export class Docs extends Component {
           <div className="card docs">
             <h1>Recon 2.0 Docs</h1>
             <h2>Recon Settings</h2>
-            <img src="assets/layout/images/recon_sample_setting.jpg"
+            <img src="assets/layout/images/recon_2_settings.jpg"
               width={"100%"}
               height={"100%"}
               alt="" />

@@ -6,9 +6,9 @@ metadata:
 data:
   nats_server: "nats://nats:4222"
   artifactId: "reconciliation-engine-ui"
-  random: "a311b9ba-6cc3-43a4-917b-2e48d78ccf08"
+  random: "a747b4e2-db21-4919-8fb6-53df32cd43b7"
   version: "0.0.1-SNAPSHOT"
-  gitVersion: "b5065987d6400927c23cec809f79916adeb30b52"
+  gitVersion: "53092650a81de0d5cee06308fab5cbaf50456658"
   configMapTemplateName: "reconciliation-engine-ui-0.0.1-snapshot"
   imageName: "docker.io/saiprasadkrishnamurthy/reconciliation-engine-ui"
   replicas: "1"
@@ -16,7 +16,8 @@ data:
   server_servlet_contextpath: "/reconciliation-engine-ui"
   server_port: "28080"
   reconTriggerSubject: "dev2.reconciliation.trigger.main"
+  spring_data_mongodb_database: "taxreco"
   serviceName: "reconciliation-engine-ui"
-  mongodb_uri: "mongodb+srv://sai:sai@cluster1.khkphay.mongodb.net/?retryWrites=true&w=majority"
+  spring_data_mongodb_uri: "mongodb+srv://sai:sai@cluster1.khkphay.mongodb.net/?retryWrites=true&w=majority"
   reconStreamName: "dev2_recon_consumer_stream"
 
