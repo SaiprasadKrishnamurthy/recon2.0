@@ -6,7 +6,7 @@ metadata:
 data:
   nats_server: "nats://nats:4222"
   artifactId: "reconciliation-engine"
-  random: "857a6659-e1ae-413c-9615-7613edba3bba"
+  random: "ce3f0d68-84bb-43e5-b1f5-ca9058144f6b"
   version: "0.0.1-SNAPSHOT"
   gitVersion: "53092650a81de0d5cee06308fab5cbaf50456658"
   configMapTemplateName: "reconciliation-engine-0.0.1-snapshot"
