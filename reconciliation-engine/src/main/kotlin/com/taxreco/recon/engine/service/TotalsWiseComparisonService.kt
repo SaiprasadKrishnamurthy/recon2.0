@@ -1,16 +1,10 @@
 package com.taxreco.recon.engine.service
 
-import com.taxreco.recon.engine.model.MatchRuleSet
-import com.taxreco.recon.engine.model.ReconciliationContext
-import com.taxreco.recon.engine.model.RulesetEvaluationService
-import com.taxreco.recon.engine.model.RulesetType
+import com.taxreco.recon.engine.model.*
 import com.taxreco.recon.engine.service.Functions.MATCH_KEY_ATTRIBUTE
-import org.springframework.context.expression.MapAccessor
-import org.springframework.expression.ExpressionParser
-import org.springframework.expression.spel.standard.SpelExpressionParser
-import org.springframework.expression.spel.support.StandardEvaluationContext
 import org.springframework.stereotype.Service
 import java.util.*
+import kotlin.math.abs
 
 @Service
 class TotalsWiseComparisonService : RulesetEvaluationService {
@@ -20,68 +14,104 @@ class TotalsWiseComparisonService : RulesetEvaluationService {
         ruleSet: MatchRuleSet
     ) {
         if (supportedRulesetType() == ruleSet.type) {
-            val parser: ExpressionParser = SpelExpressionParser()
             ruleSet.rules.forEach { rule ->
-                val tokens = rule.expression!!.split("[\\p{Punct}\\s&&[^_]]+".toRegex())
+                val totalsChecks = rule.totalsChecks!!
+                val exp = totalsChecks.totalsOnFields.joinToString(" ")
+                val tokens = exp.split("[\\p{Punct}\\s&&[^_]]+".toRegex())
                 val datasources = tokens
                     .filter { reconciliationContext.reconciliationSetting.dataSources.map { d -> d.id }.contains(it) }
                     .distinct()
-                val recordsA = reconciliationContext.transactionRecords[datasources[0]] ?: emptyList()
-                val recordsB = reconciliationContext.transactionRecords[datasources[1]] ?: emptyList()
-                val simpleContext = standardEvaluationContext(datasources[0],
-                    recordsA.map {
-                        if (!it.attrs.containsKey(MATCH_KEY_ATTRIBUTE)) {
-                            it.attrs[MATCH_KEY_ATTRIBUTE] = "\$${UUID.randomUUID()}}"
-                            it.attrs
-                        } else {
-                            it.attrs
-                        }
-                    },
-                    datasources[1],
-                    recordsB.map {
-                        if (!it.attrs.containsKey(MATCH_KEY_ATTRIBUTE)) {
-                            it.attrs[MATCH_KEY_ATTRIBUTE] = "\$${UUID.randomUUID()}}"
-                            it.attrs
-                        } else {
-                            it.attrs
-                        }
-                    }
-                )
 
-                rule.expression.let {
-                    parser.parseExpression(it).getValue(simpleContext)
+                val recordsA = reconciliationContext.transactionRecords[datasources[0]]
+                    ?.map {
+                        if (!it.attrs.containsKey(MATCH_KEY_ATTRIBUTE)) {
+                            it.attrs[MATCH_KEY_ATTRIBUTE] = "\$${UUID.randomUUID()}"
+                        }
+                        it
+                    }?.filter { it.attrs[MATCH_KEY_ATTRIBUTE].toString().startsWith("$") }
+                    ?: emptyList()
+                val recordsB = reconciliationContext.transactionRecords[datasources[1]]
+                    ?.map {
+                        if (!it.attrs.containsKey(MATCH_KEY_ATTRIBUTE)) {
+                            it.attrs[MATCH_KEY_ATTRIBUTE] = "\$${UUID.randomUUID()}"
+                        }
+                        it
+                    }?.filter { it.attrs[MATCH_KEY_ATTRIBUTE].toString().startsWith("$") }
+                    ?: emptyList()
+
+                val groupsA = mutableMapOf<String, MutableList<TransactionRecord>>()
+                val groupsB = mutableMapOf<String, MutableList<TransactionRecord>>()
+
+                if (totalsChecks.totalsBucketFields.size == 2) {
+                    addGroups(totalsChecks.totalsBucketFields[0], recordsA, groupsA)
+                    addGroups(totalsChecks.totalsBucketFields[1], recordsB, groupsB)
+                } else {
+                    addGroups("\"1\"", recordsA, groupsA)
+                    addGroups("\"1\"", recordsB, groupsB)
+                }
+
+                // Check groups.
+                groupsA.forEach { a ->
+                    val elementsA = groupsA[a.key]
+                    val elementsB = groupsB[a.key]
+                    val totalOnFieldA = totalsChecks.totalsOnFields[0].substringAfter(".")
+                    val totalOnFieldB = totalsChecks.totalsOnFields[1].substringAfter(".")
+                    val sumA = elementsA?.sumOf {
+                        it.attrs[totalOnFieldA]?.toString()?.toDouble() ?: 0.0
+                    }
+                    val sumB = elementsB?.sumOf {
+                        it.attrs[totalOnFieldB]?.toString()?.toDouble() ?: 0.0
+                    }
+                    var matchKey = UUID.randomUUID().toString()
+                    if (sumA != null && sumB != null && abs(sumA - sumB) <= rule.totalsChecks.totalsTolerance) {
+                        elementsA.filter {
+                            !it.attrs.containsKey(MATCH_KEY_ATTRIBUTE) || it.attrs[MATCH_KEY_ATTRIBUTE].toString()
+                                .contains("$")
+                        }.forEach { it.attrs[MATCH_KEY_ATTRIBUTE] = matchKey }
+                        elementsB.filter {
+                            !it.attrs.containsKey(MATCH_KEY_ATTRIBUTE) || it.attrs[MATCH_KEY_ATTRIBUTE].toString()
+                                .contains("$")
+                        }.forEach { it.attrs[MATCH_KEY_ATTRIBUTE] = matchKey }
+                    } else {
+                        matchKey = "\$${matchKey}"
+                        elementsA?.forEach { it.attrs[MATCH_KEY_ATTRIBUTE] = matchKey }
+                        elementsB?.forEach { it.attrs[MATCH_KEY_ATTRIBUTE] = matchKey }
+                    }
                 }
                 addMatchTags(rule, recordsA, recordsB)
             }
         }
     }
 
-    override fun supportedRulesetType(): RulesetType {
-        return RulesetType.TotalsChecks
+    private fun addGroups(
+        expression: String,
+        records: List<TransactionRecord>,
+        groups: MutableMap<String, MutableList<TransactionRecord>>
+    ) {
+        records.forEach { a ->
+            val result = evalExpression(expression, a.name, a.attrs)
+            if (result != null) {
+                if (groups.containsKey(result.toString())) {
+                    groups[result.toString()]?.add(a)
+                } else {
+                    groups[result.toString()] = mutableListOf(a)
+                }
+            }
+        }
     }
 
-    private fun standardEvaluationContext(
-        keyA: String,
-        attsA: List<Map<String, Any>>,
-        keyB: String,
-        attsB: List<Map<String, Any>>
-    ): StandardEvaluationContext {
-        val simpleContext = StandardEvaluationContext(mapOf(keyA to attsA, keyB to attsB))
-        simpleContext.addPropertyAccessor(MapAccessor())
-        simpleContext.registerFunction(
-            "totalEqualsWithNumericTolerance",
-            Functions::class.java.getDeclaredMethod(
-                "totalEqualsWithNumericTolerance",
-                String::class.java,
-                List::class.java,
-                List::class.java,
-                List::class.java,
-                List::class.java,
-                String::class.java,
-                String::class.java,
-                Double::class.java
-            )
-        )
-        return simpleContext
+    private fun evalExpression(
+        expression: String,
+        name: String,
+        attrs: MutableMap<String, Any?>
+    ): Any? {
+        val vars = mutableMapOf(name to attrs)
+        val expr = cleanseExpr(expression, vars)
+        return evaluateToObj(expr, vars)
+    }
+
+
+    override fun supportedRulesetType(): RulesetType {
+        return RulesetType.TotalsChecks
     }
 }

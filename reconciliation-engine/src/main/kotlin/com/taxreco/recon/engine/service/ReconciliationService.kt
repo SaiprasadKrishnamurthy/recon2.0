@@ -47,18 +47,20 @@ class ReconciliationService(
                 transactionRecordRepository.findBuckets(ds)
             }.distinct()
                 .flatMap { bucket ->
-                    setting.rulesets.map { rs ->
-                        ReconciliationTriggeredForBucketEvent(
-                            tenantId = reconciliationTriggeredEvent.tenantId,
-                            reconSettingName = reconciliationTriggeredEvent.reconSettingName,
-                            reconSettingVersion = reconciliationTriggeredEvent.reconSettingVersion,
-                            streamResults = reconciliationTriggeredEvent.streamResults,
-                            bucketValue = bucket,
-                            ruleSetName = rs.name,
-                            startedAt = reconciliationTriggeredEvent.startedAt,
-                            jobId = reconciliationTriggeredEvent.jobId
-                        )
-                    }
+                    setting.rulesets
+                        .filter { reconciliationTriggeredEvent.rulesetTypes.contains(it.type) || reconciliationTriggeredEvent.rulesetTypes.isEmpty() }
+                        .map { rs ->
+                            ReconciliationTriggeredForBucketEvent(
+                                tenantId = reconciliationTriggeredEvent.tenantId,
+                                reconSettingName = reconciliationTriggeredEvent.reconSettingName,
+                                reconSettingVersion = reconciliationTriggeredEvent.reconSettingVersion,
+                                streamResults = reconciliationTriggeredEvent.streamResults,
+                                bucketValue = bucket,
+                                ruleSetName = rs.name,
+                                startedAt = reconciliationTriggeredEvent.startedAt,
+                                jobId = reconciliationTriggeredEvent.jobId
+                            )
+                        }
                 }.forEachIndexed { index, reconciliationTriggeredForBucketEvent ->
                     // set up only for the first time.
                     if (index == 0) {
@@ -166,7 +168,7 @@ class ReconciliationService(
                     endedAt = if (count >= it.expectedBucketValuesCount) System.currentTimeMillis() else null,
                     finished = count >= it.expectedBucketValuesCount
                 )
-                if(reconciliationJobProgressEvent.finished) {
+                if (reconciliationJobProgressEvent.finished) {
                     logger.info(" ******************************** ${reconciliationTriggeredEvent.jobId} Finished for Tenant ${reconciliationTriggeredEvent.tenantId}  ******************************* ")
                     jobProgressStateRepository.deleteByJobId(reconciliationTriggeredEvent.jobId)
                 }

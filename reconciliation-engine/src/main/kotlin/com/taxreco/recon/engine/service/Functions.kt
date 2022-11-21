@@ -1,10 +1,27 @@
 package com.taxreco.recon.engine.service
 
 import com.taxreco.recon.engine.model.MatchKeyContext
+import java.util.*
 import kotlin.math.abs
 
 object Functions {
     const val MATCH_KEY_ATTRIBUTE = "__matchkey"
+
+    fun equals(a: String, b: String) = a.lowercase(Locale.getDefault()).trim() == b.lowercase(Locale.getDefault()).trim()
+
+    fun startsWith(a: String, b: String) = a.lowercase(Locale.getDefault()).trim().startsWith(
+        b.lowercase(Locale.getDefault()).trim()
+    )
+
+    fun contains(a: String, b: String) = a.lowercase().trim().contains(b.lowercase().trim())
+
+    @JvmStatic
+    fun containsAny(a: String, b: String): Boolean {
+        val x = a.lowercase().split("[\\p{Punct}\\s]+".toRegex())
+        val y = b.lowercase().split("[\\p{Punct}\\s]+".toRegex())
+        return x.any { y.contains(it) }
+    }
+
 
     @JvmStatic
     fun valueWithinTolerance(a: Double, b: Double, t: Double): Boolean {
@@ -71,7 +88,7 @@ object Functions {
                 val sumA = recA.value.mapNotNull { it[fieldA]?.toString()?.toDoubleOrNull() }.sum()
                 val sumB = groupB[recA.key]?.mapNotNull { it[fieldB]?.toString()?.toDoubleOrNull() }?.sum()
                 if (sumB != null && abs(sumA - sumB) <= tolerance) {
-                    val matchKey =MatchKeyContext.keyFor(name)
+                    val matchKey = MatchKeyContext.keyFor(name)
                     recA.value.forEach { ra ->
                         if (!ra.containsKey(MATCH_KEY_ATTRIBUTE) || ra[MATCH_KEY_ATTRIBUTE].toString()
                                 .contains("$")

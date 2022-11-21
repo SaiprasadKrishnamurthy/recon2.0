@@ -9,6 +9,10 @@ object MatchKeyContext {
         return UUID.randomUUID().toString()
     }
 
+    fun keyFor(): String {
+        return UUID.randomUUID().toString()
+    }
+
     fun clearAll() {
         keys.clear()
     }

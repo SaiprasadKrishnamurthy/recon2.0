@@ -21,12 +21,53 @@
   ],
   "rulesets": [
     {
+      "name": "Entry Checks",
+      "type": "EntryWiseOneToOneChecks",
+      "rules": [
+        {
+          "id": "tds_value_checks_on_sales_and_tds_ledger",
+          "entriesChecks": {
+            "expression": "sales.invoiceNo == tdsLedger.invoiceNo AND valueWithinTolerance(sales.tdsOnSales, tdsLedger.tds, 1.0)"
+          },
+          "tagsWhenMatched": [
+            "TDS_MATCHED_BETWEEN_SALES_AND_TDS_LEDGER"
+          ],
+          "tagsWhenNotMatched": [
+            "TDS_UNMATCHED_BETWEEN_SALES_AND_TDS_LEDGER"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Entry Checks One To Many",
+      "type": "EntryWiseOneToManyChecks",
+      "rules": [
+        {
+          "id": "multi_tds_value_checks_on_sales_and_tds_ledger",
+          "entriesOneToManyChecks": {
+            "bucketFieldA": "sales.invoiceNo",
+            "bucketFieldB": "tdsLedger.invoiceNo",
+            "valueFieldA": "sales.tdsOnSales",
+            "valueFieldB": "tdsLedger.tds"
+          },
+          "tagsWhenMatched": [
+            "MULTI_TDS_MATCHED_BETWEEN_SALES_AND_TDS_LEDGER"
+          ],
+          "tagsWhenNotMatched": [
+            "MULTI_TDS_UNMATCHED_BETWEEN_SALES_AND_TDS_LEDGER"
+          ]
+        }
+      ]
+    },
+    {
       "name": "Field Checks",
       "type": "FieldChecks",
       "rules": [
         {
           "id": "tds_value_checks_on_sales",
-          "expression": "#valueWithinTolerance(sales.tdsOnSales, 0.1 * sales.transactionAmount, 1.0)",
+          "fieldChecks": {
+            "expression": "valueWithinTolerance(sales.tdsOnSales, 0.1 * sales.transactionAmount, 1.0)"
+          },
           "tagsWhenMatched": [
             "CORRECT_TDS_ON_SALES"
           ],
@@ -36,7 +77,9 @@
         },
         {
           "id": "tds_value_checks_on_tds_ledger",
-          "expression": "tdsLedger.tds > 0",
+          "fieldChecks": {
+            "expression": "tdsLedger.tds > 0"
+          },
           "tagsWhenMatched": [
             "CORRECT_TDS_ON_TDS_LEDGER"
           ],
@@ -52,42 +95,38 @@
       "rules": [
         {
           "id": "tds_totals_at_transactions_level_between_sales_and_tds_ledger",
-          "expression": "#totalEqualsWithNumericTolerance('tds_totals_at_transactions_level_between_sales_and_tds_ledger', sales, tdsLedger, {'invoiceNo'}, {'invoiceNo'}, 'tdsOnSales', 'tds', 1.0)",
+          "totalsChecks": {
+            "totalsBucketFields": [
+              "sales.invoiceNo",
+              "tdsLedger.invoiceNo"
+            ],
+            "totalsOnFields": [
+              "sales.tdsOnSales",
+              "tdsLedger.tds"
+            ],
+            "totalsTolerance": 1.0
+          },
           "tagsWhenMatched": [
-            "TRANSACTION_TOTALS_MATCHED_BETWEEN_SALES_AND_TDSLEDGER"
+            "TDS_TOTALS_MATCHED_BETWEEN_SALES_AND_TDSLEDGER"
           ],
           "tagsWhenNotMatched": [
-            "TRANSACTION_TOTALS_UNMATCHED_BETWEEN_SALES_AND_TDSLEDGER"
+            "TDS_TOTALS_UNMATCHED_BETWEEN_SALES_AND_TDSLEDGER"
           ]
         },
         {
           "id": "tds_totals_at_transactions_level_between_tds_ledger_and_26as",
-          "expression": "#totalEqualsWithNumericTolerance('tds_totals_at_transactions_level_between_tds_ledger_and_26as', tdsLedger, _26as, {'invoiceNo'}, {'invoiceNo'}, 'tds', 'taxFiled', 1.0)",
+          "totalsChecks": {
+            "totalsOnFields": [
+              "tdsLedger.tds",
+              "_26as.taxFiled"
+            ],
+            "totalsTolerance": 1.0
+          },
           "tagsWhenMatched": [
-            "TRANSACTION_TOTALS_MATCHED_BETWEEN_TDSLEDGER_AND_26AS"
+            "TDS_TOTALS_MATCHED_BETWEEN_TDSLEDGER_AND_26AS"
           ],
           "tagsWhenNotMatched": [
-            "TRANSACTION_TOTALS_UNMATCHED_BETWEEN_TDSLEDGER_AND_26AS"
-          ]
-        }
-      ]
-    },
-    {
-      "name": "Transaction Level Matches",
-      "type": "EntryWiseOneToManyChecks",
-      "terminateWhenTagsPresent": [
-        "TRANSACTION_TOTALS_MATCHED_BETWEEN_SALES_AND_TDSLEDGER"
-      ],
-      "rules": [
-        {
-          "id": "tds_at_transactions_level_between_sales_and_tds_ledger",
-          "expression1": "#valueWithinTolerance(sales.tdsOnSales, tdsLedger.tds, 1.0) && sales.invoiceNo == tdsLedger.invoiceNo",
-          "expression": "#multimatch('tds_at_transactions_level_between_sales_and_tds_ledger', sales, tdsLedger, {'invoiceNo'}, {'invoiceNo'}, 'tdsOnSales', 'tds', 1.0)",
-          "tagsWhenMatched": [
-            "TRANSACTIONS_MATCHED_BETWEEN_SALES_AND_TDSLEDGER"
-          ],
-          "tagsWhenNotMatched": [
-            "TRANSACTIONS_UNMATCHED_BETWEEN_SALES_AND_TDSLEDGER"
+            "TDS_TOTALS_UNMATCHED_BETWEEN_TDSLEDGER_AND_26AS"
           ]
         }
       ]

@@ -3,6 +3,7 @@ package com.taxreco.recon.engine.model
 data class ReconciliationTriggeredEvent(
     val tenantId: String,
     val jobId: String,
+    val rulesetTypes: List<RulesetType> = RulesetType.values().toList(),
     val startedAt: Long = System.currentTimeMillis(),
     val reconSettingName: String,
     val reconSettingVersion: Long,

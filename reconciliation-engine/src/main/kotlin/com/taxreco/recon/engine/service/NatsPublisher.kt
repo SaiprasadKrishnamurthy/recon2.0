@@ -31,12 +31,14 @@ class NatsPublisher(
     }
 
     override fun publish(progressEvent: ReconciliationJobProgressEvent) {
-        val topic = progressEvent.tenantId + ".progress"
-        val json = jacksonObjectMapper.writeValueAsString(progressEvent)
-        connection.jetStream().publish(
-            topic,
-            json.toByteArray(Charset.defaultCharset())
-        )
+        try {
+            val topic = progressEvent.tenantId + ".progress"
+            val json = jacksonObjectMapper.writeValueAsString(progressEvent)
+            connection.jetStream().publish(
+                topic,
+                json.toByteArray(Charset.defaultCharset())
+            )
+        }catch (ex: Exception){}
     }
 
     override fun init(reconciliationContext: ReconciliationContext) {

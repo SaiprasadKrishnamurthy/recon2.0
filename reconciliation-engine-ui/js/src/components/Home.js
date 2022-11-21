@@ -6,7 +6,8 @@ import Terminal from 'react-console-emulator';
 import { Client } from '@stomp/stompjs';
 import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
-import { JsonToTable } from 'react-json-to-table';
+import ReactJson from 'react-json-view'
+
 
 
 export class Home extends Component {
@@ -23,7 +24,7 @@ export class Home extends Component {
             job: { jobId: uniqueId },
             progress: { expectedCount: '', processedCount: '' },
             matches: [],
-            settings: {}
+            settings: null
         };
     }
 
@@ -95,7 +96,13 @@ export class Home extends Component {
             </DataTable>;
         }
         if (this.state.settings) {
-            settings = <JsonToTable json={this.state.settings} />
+            settings = <ReactJson src={this.state.settings}
+                theme={"bright"}
+                iconStyle={"square"}
+                collapsed={3}
+                name={"ReconSettings"}
+                display
+            />
         }
         return (
             <React.Fragment>
@@ -112,8 +119,12 @@ export class Home extends Component {
                                         description: 'Start a job',
                                         usage: 'start',
                                         fn: (...args) => {
-                                            this.setState({ progress: { expectedCount: '', processedCount: '' }, matches: [], settings: {} });
-                                            axiosClient.post('/recon/trigger/' + this.state.job.jobId)
+                                            let checksTypes = "";
+                                            if (args[0]) {
+                                                checksTypes = args[0];
+                                            }
+                                            this.setState({ progress: { expectedCount: '', processedCount: '' }, matches: [], settings: null });
+                                            axiosClient.post('/recon/trigger/' + this.state.job.jobId + "?checksTypes=" + checksTypes)
                                                 .then(res => {
                                                     this.setState({ job: res.data });
                                                 }).catch(err => {

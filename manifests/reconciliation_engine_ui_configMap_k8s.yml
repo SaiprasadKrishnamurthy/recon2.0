@@ -6,9 +6,9 @@ metadata:
 data:
   nats_server: "nats://nats:4222"
   artifactId: "reconciliation-engine-ui"
-  random: "4971a289-c8f2-431a-a08f-d71d23fdfe99"
+  random: "38d87de6-ddde-40c6-ae9d-c8fda8e49a81"
   version: "0.0.1-SNAPSHOT"
-  gitVersion: "deeadcc02b9bcaaade6fa54943001c146af1f936"
+  gitVersion: "162202fcb0ba8246932bd27006b08ea34707b7e7"
   configMapTemplateName: "reconciliation-engine-ui-0.0.1-snapshot"
   imageName: "docker.io/saiprasadkrishnamurthy/reconciliation-engine-ui"
   replicas: "1"

@@ -18,7 +18,7 @@ data class TransactionRecord(
     @Id
     var id: RecordId? = null,
     val name: String,
-    val attrs: MutableMap<String, Any> = LinkedHashMap(),
+    val attrs: MutableMap<String, Any?> = LinkedHashMap(),
     @Transient
     var matchTags: MutableSet<String> = mutableSetOf()
 ) {

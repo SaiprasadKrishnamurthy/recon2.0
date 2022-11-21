@@ -17,6 +17,6 @@ data class MatchRecord(
     val bucketKey: String,
     val bucketValue: String,
     val matchKey: String,
-    val record: Map<String, Any>,
+    val record: MutableMap<String, Any?>,
     val datasource: String
 )
