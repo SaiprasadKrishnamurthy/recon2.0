@@ -1,5 +1,0 @@
-service_name: ingest-service
-server_port: 38080
-api_version: v1
-no_of_lines_in_chunk: 5000
-mongo_uri: "mongodb+srv://sai:sai@cluster1.khkphay.mongodb.net/?retryWrites=true&w=majority"
