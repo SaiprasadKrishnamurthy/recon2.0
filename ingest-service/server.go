@@ -1,9 +1,11 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"strings"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/saiprasadkrishnamurthy/ingest-service/handler"
@@ -11,12 +13,15 @@ import (
 	"github.com/saiprasadkrishnamurthy/ingest-service/model"
 	"github.com/saiprasadkrishnamurthy/ingest-service/service"
 	"github.com/spf13/viper"
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 func main() {
 	r := gin.Default()
-	r.Use(middleware.Auth)
 	serviceFactory := setupDependencies()
+	r.Use(middleware.Auth(serviceFactory.MongoClient))
+	r.Use(middleware.CORSMiddleware())
 	r.GET("/", func(ctx *gin.Context) {
 		tenant, _ := ctx.Get("tenant")
 		response := serviceFactory.HandlePartition(
@@ -24,7 +29,7 @@ func main() {
 				IdField:     "",
 				Tenant:      tenant.(string),
 				Name:        "sales",
-				ZipFilePath: "/Users/saiprasadkrishnamurthy/2.0/ingest-service/ingest.zip",
+				ZipFilePath: "/Users/saiprasadkrishnamurthy/2.0/recon2.0/ingest-service/ingest.zip",
 			})
 		ctx.JSON(200, response)
 	})
@@ -51,12 +56,20 @@ func readConfig() {
 
 	err := viper.ReadInConfig()
 	if err != nil {
-		fmt.Println("fatal error config file: default \n", err)
+		fmt.Println("fatal error config file \n", err)
 		os.Exit(1)
 	}
 }
 func NewServiceFactory(ingestService *service.IngestService) *handler.ServiceFactory {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	client, err := mongo.Connect(ctx, options.Client().ApplyURI(viper.GetString("mongo_uri")))
+	if err != nil {
+		fmt.Println("fatal error connecting to mongo \n", err)
+		os.Exit(1)
+	}
 	return &handler.ServiceFactory{
 		IngestService: ingestService,
+		MongoClient:   client,
 	}
 }

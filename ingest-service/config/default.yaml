@@ -1,3 +1,2 @@
 no_of_lines_in_chunk: 5000
-consumerbroker: "first.example.com:9092"
-producerbroker: "second.example.com:9092"
+mongo_uri: "mongodb+srv://sai:sai@cluster1.khkphay.mongodb.net/?retryWrites=true&w=majority"
