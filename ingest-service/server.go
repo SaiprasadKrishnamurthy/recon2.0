@@ -14,6 +14,7 @@ import (
 	"github.com/saiprasadkrishnamurthy/ingest-service/middleware"
 	"github.com/saiprasadkrishnamurthy/ingest-service/model"
 	"github.com/saiprasadkrishnamurthy/ingest-service/service"
+	"github.com/saiprasadkrishnamurthy/ingest-service/storage"
 	"github.com/spf13/viper"
 	"github.com/twinj/uuid"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -54,13 +55,15 @@ func main() {
 		}
 
 		tenant, _ := ctx.Get("tenant")
+		objectStorageId, _ := ctx.Get("objectStorageId")
 		response := serviceFactory.HandlePartition(
 			&model.PartitionFileRequest{
-				IdField:     idField,
-				Tenant:      tenant.(string),
-				Name:        name,
-				Tags:        strings.Split(tags, ","),
-				ZipFilePath: destDir + "/" + file.Filename,
+				IdField:         idField,
+				Tenant:          tenant.(string),
+				ObjectStorageId: objectStorageId.(string),
+				Name:            name,
+				Tags:            strings.Split(tags, ","),
+				ZipFilePath:     destDir + "/" + file.Filename,
 			})
 		ctx.JSON(200, response)
 	})
@@ -75,7 +78,9 @@ func setupDependencies() *handler.ServiceFactory {
 		Error: log.New(logFile, "ERROR: ", log.Ldate|log.Ltime|log.Lshortfile),
 	}
 	fmt.Println(" Log File ===> ", logFile.Name())
-	return NewServiceFactory(log, service.NewIngestService(log))
+	return NewServiceFactory(log,
+		service.NewIngestService(log),
+		storage.NewS3Manager(log))
 }
 
 func readConfig() {
@@ -97,7 +102,9 @@ func readConfig() {
 		os.Exit(1)
 	}
 }
-func NewServiceFactory(log *model.Log, ingestService *service.IngestService) *handler.ServiceFactory {
+func NewServiceFactory(log *model.Log,
+	ingestService *service.IngestService,
+	s3Manager *storage.S3Manager) *handler.ServiceFactory {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 	client, err := mongo.Connect(ctx, options.Client().ApplyURI(viper.GetString("mongo_uri")))
@@ -109,5 +116,6 @@ func NewServiceFactory(log *model.Log, ingestService *service.IngestService) *ha
 		IngestService: ingestService,
 		MongoClient:   client,
 		Log:           log,
+		S3Manager:     s3Manager,
 	}
 }

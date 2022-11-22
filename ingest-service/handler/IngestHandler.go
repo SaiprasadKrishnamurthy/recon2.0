@@ -3,6 +3,7 @@ package handler
 import (
 	"log"
 	"os"
+	"strings"
 
 	"github.com/saiprasadkrishnamurthy/ingest-service/model"
 	"github.com/twinj/uuid"
@@ -24,7 +25,16 @@ func (serviceFactory *ServiceFactory) HandlePartition(request *model.PartitionFi
 		log.Fatal(err)
 	}
 
-	chunks := serviceFactory.IngestService.PartitionFiles(request.ZipFilePath, baseDir, chunkDir)
+	chunks := serviceFactory.IngestService.PartitionFiles(request.Name, request.ZipFilePath, baseDir, chunkDir)
+
+	for _, chunkFile := range chunks {
+		serviceFactory.Log.Info.Println(" About to upload to S3", chunkFile)
+		id := strings.Split(chunkFile, "/")[0]
+		fileName := strings.Split(chunkFile, "/")[1]
+		s3Key := request.Name + "/" + id + "/" + fileName
+		serviceFactory.S3Manager.UploadToS3(request.ObjectStorageId, s3Key, chunkFile)
+		serviceFactory.Log.Info.Printf(" Uploaded %s to S3 to %s", chunkFile, s3Key)
+	}
 
 	// Upload these Files to S3.
 	// Emit an Event per file with uploaded file path.

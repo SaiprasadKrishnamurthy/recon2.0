@@ -16,7 +16,7 @@ type IngestService struct {
 	Log *model.Log
 }
 
-func (s *IngestService) PartitionFiles(sourceZipFile string, baseDir string, chunkDir string) []string {
+func (s *IngestService) PartitionFiles(prefix string, sourceZipFile string, baseDir string, chunkDir string) []string {
 	s.Log.Info.Println(" Partitioning the files now ", sourceZipFile)
 	util.Unzip(sourceZipFile, baseDir)
 	unzippedFiles, err := ioutil.ReadDir(baseDir)
@@ -25,7 +25,7 @@ func (s *IngestService) PartitionFiles(sourceZipFile string, baseDir string, chu
 	}
 	for _, file := range unzippedFiles {
 		unzippedFile := baseDir + "/" + file.Name()
-		split(unzippedFile, viper.GetInt("no_of_lines_in_chunk"), chunkDir)
+		split(prefix, unzippedFile, viper.GetInt("no_of_lines_in_chunk"), chunkDir)
 	}
 
 	var chunks []string
@@ -40,7 +40,7 @@ func (s *IngestService) PartitionFiles(sourceZipFile string, baseDir string, chu
 	return chunks
 }
 
-func split(path string, noOfLines int, outDir string) {
+func split(prefix string, path string, noOfLines int, outDir string) {
 	file, err := os.Open(path)
 	if err != nil {
 		log.Fatal(err)
@@ -52,7 +52,7 @@ func split(path string, noOfLines int, outDir string) {
 	var header string
 	var headerParsed bool = false
 	var chunkNo = 1
-	var outFile, _ = os.Create(outDir + "/chunk_" + strconv.Itoa(chunkNo) + ".txt")
+	var outFile, _ = os.Create(outDir + "/" + prefix + "_chunk_" + strconv.Itoa(chunkNo) + ".txt")
 	var w = bufio.NewWriter(outFile)
 	defer outFile.Close()
 
@@ -72,7 +72,7 @@ func split(path string, noOfLines int, outDir string) {
 		if lineNo%noOfLines == 0 {
 			lineNo = 0
 			chunkNo++
-			outFile, _ = os.Create(outDir + "/chunk_" + strconv.Itoa(chunkNo) + ".txt")
+			outFile, _ = os.Create(outDir + "/" + prefix + "_chunk_" + strconv.Itoa(chunkNo) + ".txt")
 			w.Flush()
 			w = bufio.NewWriter(outFile)
 			w.WriteString(header + "\n")

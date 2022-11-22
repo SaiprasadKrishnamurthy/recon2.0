@@ -44,6 +44,7 @@ func Auth(mongoClient *mongo.Client) gin.HandlerFunc {
 				return
 			}
 			c.Set("tenant", apiUser.TenantId)
+			c.Set("objectStorageId", apiUser.ObjectStorageId)
 		}
 		c.Next()
 	}
