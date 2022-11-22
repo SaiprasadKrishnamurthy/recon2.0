@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"strconv"
 	"strings"
 	"time"
 
@@ -20,9 +21,11 @@ import (
 func main() {
 	r := gin.Default()
 	serviceFactory := setupDependencies()
+	apiVersion := viper.GetString("api_version")
+	serviceName := viper.GetString("service_name")
 	r.Use(middleware.Auth(serviceFactory.MongoClient))
 	r.Use(middleware.CORSMiddleware())
-	r.GET("/", func(ctx *gin.Context) {
+	r.GET(serviceName+"/api/"+apiVersion, func(ctx *gin.Context) {
 		tenant, _ := ctx.Get("tenant")
 		response := serviceFactory.HandlePartition(
 			&model.PartitionFileRequest{
@@ -33,7 +36,7 @@ func main() {
 			})
 		ctx.JSON(200, response)
 	})
-	r.Run(":38080")
+	r.Run(":" + strconv.Itoa(viper.GetInt("server_port")))
 }
 
 func setupDependencies() *handler.ServiceFactory {
