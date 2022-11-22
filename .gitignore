@@ -15,6 +15,7 @@ local.properties
 .loadpath
 .recommenders
 
+
 # External tool builders
 .externalToolBuilders/
 
@@ -585,3 +586,4 @@ _data
 # Directories potentially created on remote AFP share
 
 # End of https://www.gitignore.io/api/osx,node,macos,maven,eclipse,intellij+all
+/ingest-service-logs.txt

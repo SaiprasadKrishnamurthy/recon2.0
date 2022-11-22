@@ -2,6 +2,13 @@
 
 build () {
   mvn clean install -Ddocker.image.publish=false -Ddocker.registry.password=dummy -DskipTests
+  echo "Building Ingest Service GO Project"
+  curr=`pwd`
+  rm -rf ingest-service/bin/*
+  GOOS=linux GOARCH=amd64 && cd ingest-service && go build -o `pwd`/bin/ingest-service-amd64-linux . && echo "Built Linux Compatible Binary of Ingest Service GO Project" && cd ..
+  GOOS=darwin GOARCH=amd64 && cd ingest-service && go build -o `pwd`/bin/ingest-service-amd64-linux . && echo "Built OS/X Compatible Binary of Ingest Service GO Project" && cd ..
+  GOOS=windows GOARCH=darwin && cd ingest-service && go build -o `pwd`/bin/ingest-service-amd64-linux . && echo "Built Windows Compatible Binary of Ingest Service GO Project" && cd ..
+  cd $curr
 }
 
 buildandpush () {
