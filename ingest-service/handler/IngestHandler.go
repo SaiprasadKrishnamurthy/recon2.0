@@ -9,6 +9,7 @@ import (
 )
 
 func (serviceFactory *ServiceFactory) HandlePartition(request *model.PartitionFileRequest) model.PartitionFileResponse {
+	serviceFactory.Log.Info.Println(" Handle Partition ")
 	baseDir := uuid.NewV4().String()
 	chunkDir := uuid.NewV4().String()
 	defer os.RemoveAll(baseDir)

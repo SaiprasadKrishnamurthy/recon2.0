@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"log"
 	"os"
 	"strconv"
 	"strings"
@@ -14,9 +15,17 @@ import (
 	"github.com/saiprasadkrishnamurthy/ingest-service/model"
 	"github.com/saiprasadkrishnamurthy/ingest-service/service"
 	"github.com/spf13/viper"
+	"github.com/twinj/uuid"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
+
+var logFile *os.File
+
+func init() {
+	logFile, _ = os.OpenFile("ingest-service-logs.txt", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0666)
+	fmt.Println(" Setting up log file ", logFile.Name())
+}
 
 func main() {
 	r := gin.Default()
@@ -25,14 +34,33 @@ func main() {
 	serviceName := viper.GetString("service_name")
 	r.Use(middleware.Auth(serviceFactory.MongoClient))
 	r.Use(middleware.CORSMiddleware())
-	r.GET(serviceName+"/api/"+apiVersion, func(ctx *gin.Context) {
+	r.POST(serviceName+"/api/"+apiVersion+"/ingest/:name", func(ctx *gin.Context) {
+		name := ctx.Param("name")
+		idField := ctx.Query("idField")
+		tags := ctx.Query("tags")
+		file, _ := ctx.FormFile("file")
+		destDir := uuid.NewV4().String()
+		defer os.RemoveAll(destDir)
+		defer os.Remove(destDir)
+
+		if err := os.Mkdir(destDir, os.ModePerm); err != nil {
+			log.Fatal(err)
+		}
+
+		err := ctx.SaveUploadedFile(file, destDir+"/"+file.Filename)
+
+		if err != nil {
+			fmt.Println("Cant save the uploaded file to disk! ", err)
+		}
+
 		tenant, _ := ctx.Get("tenant")
 		response := serviceFactory.HandlePartition(
 			&model.PartitionFileRequest{
-				IdField:     "",
+				IdField:     idField,
 				Tenant:      tenant.(string),
-				Name:        "sales",
-				ZipFilePath: "/Users/saiprasadkrishnamurthy/2.0/recon2.0/ingest-service/ingest.zip",
+				Name:        name,
+				Tags:        strings.Split(tags, ","),
+				ZipFilePath: destDir + "/" + file.Filename,
 			})
 		ctx.JSON(200, response)
 	})
@@ -41,7 +69,13 @@ func main() {
 
 func setupDependencies() *handler.ServiceFactory {
 	readConfig()
-	return NewServiceFactory(service.NewIngestService())
+	log := &model.Log{
+		Info:  log.New(logFile, "INFO: ", log.Ldate|log.Ltime|log.Lshortfile),
+		Warn:  log.New(logFile, "WARNING: ", log.Ldate|log.Ltime|log.Lshortfile),
+		Error: log.New(logFile, "ERROR: ", log.Ldate|log.Ltime|log.Lshortfile),
+	}
+	fmt.Println(" Log File ===> ", logFile.Name())
+	return NewServiceFactory(log, service.NewIngestService(log))
 }
 
 func readConfig() {
@@ -63,7 +97,7 @@ func readConfig() {
 		os.Exit(1)
 	}
 }
-func NewServiceFactory(ingestService *service.IngestService) *handler.ServiceFactory {
+func NewServiceFactory(log *model.Log, ingestService *service.IngestService) *handler.ServiceFactory {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 	client, err := mongo.Connect(ctx, options.Client().ApplyURI(viper.GetString("mongo_uri")))
@@ -74,5 +108,6 @@ func NewServiceFactory(ingestService *service.IngestService) *handler.ServiceFac
 	return &handler.ServiceFactory{
 		IngestService: ingestService,
 		MongoClient:   client,
+		Log:           log,
 	}
 }

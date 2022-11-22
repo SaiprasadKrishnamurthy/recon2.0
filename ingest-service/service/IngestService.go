@@ -7,14 +7,17 @@ import (
 	"os"
 	"strconv"
 
+	"github.com/saiprasadkrishnamurthy/ingest-service/model"
 	"github.com/saiprasadkrishnamurthy/ingest-service/util"
 	"github.com/spf13/viper"
 )
 
 type IngestService struct {
+	Log *model.Log
 }
 
 func (s *IngestService) PartitionFiles(sourceZipFile string, baseDir string, chunkDir string) []string {
+	s.Log.Info.Println(" Partitioning the files now ", sourceZipFile)
 	util.Unzip(sourceZipFile, baseDir)
 	unzippedFiles, err := ioutil.ReadDir(baseDir)
 	if err != nil {
@@ -33,6 +36,7 @@ func (s *IngestService) PartitionFiles(sourceZipFile string, baseDir string, chu
 	for _, chunk := range chunkedFiles {
 		chunks = append(chunks, chunkDir+"/"+chunk.Name())
 	}
+	s.Log.Info.Println(" Finished Partitioning the files. Chunks: ", len(chunks))
 	return chunks
 }
 
@@ -80,6 +84,6 @@ func split(path string, noOfLines int, outDir string) {
 	}
 }
 
-func NewIngestService() *IngestService {
-	return &IngestService{}
+func NewIngestService(log *model.Log) *IngestService {
+	return &IngestService{Log: log}
 }
