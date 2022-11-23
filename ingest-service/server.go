@@ -10,7 +10,9 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/nats-io/nats.go"
 	"github.com/saiprasadkrishnamurthy/ingest-service/handler"
+	"github.com/saiprasadkrishnamurthy/ingest-service/listener"
 	"github.com/saiprasadkrishnamurthy/ingest-service/middleware"
 	"github.com/saiprasadkrishnamurthy/ingest-service/model"
 	"github.com/saiprasadkrishnamurthy/ingest-service/service"
@@ -35,7 +37,7 @@ func main() {
 	serviceName := viper.GetString("service_name")
 	r.Use(middleware.Auth(serviceFactory.MongoClient))
 	r.Use(middleware.CORSMiddleware())
-	r.POST(serviceName+"/api/"+apiVersion+"/ingest/:name", func(ctx *gin.Context) {
+	r.POST(serviceName+"/api/"+apiVersion+"/ingest/:name/", func(ctx *gin.Context) {
 		name := ctx.Param("name")
 		idField := ctx.Query("idField")
 		tags := ctx.Query("tags")
@@ -112,10 +114,29 @@ func NewServiceFactory(log *model.Log,
 		fmt.Println("fatal error connecting to mongo \n", err)
 		os.Exit(1)
 	}
+
+	nc, _ := nats.Connect(viper.GetString("nats_url"))
+	js, _ := nc.JetStream()
+
+	x, err := js.AddStream(&nats.StreamConfig{
+		Name:     viper.GetString("ingest_stream"),
+		Subjects: []string{viper.GetString("ingest_event_subject")},
+	})
+
+	if err != nil {
+		log.Warn.Printf(" Unable to create a stream %s", err)
+	} else {
+		log.Info.Printf(" Created a stream %s with a subject %s at %s",
+			viper.GetString("ingest_stream"),
+			viper.GetString("ingest_event_subject"), x.Created)
+	}
+
+	listener.InitializeAllListeners(nc, log, client, s3Manager)
 	return &handler.ServiceFactory{
 		IngestService: ingestService,
 		MongoClient:   client,
 		Log:           log,
 		S3Manager:     s3Manager,
+		Nats:          nc,
 	}
 }

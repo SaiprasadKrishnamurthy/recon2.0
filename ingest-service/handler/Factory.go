@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"github.com/nats-io/nats.go"
 	"github.com/saiprasadkrishnamurthy/ingest-service/model"
 	"github.com/saiprasadkrishnamurthy/ingest-service/service"
 	"github.com/saiprasadkrishnamurthy/ingest-service/storage"
@@ -12,4 +13,5 @@ type ServiceFactory struct {
 	Log           *model.Log
 	MongoClient   *mongo.Client
 	S3Manager     *storage.S3Manager
+	Nats          *nats.Conn
 }

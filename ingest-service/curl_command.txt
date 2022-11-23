@@ -1,0 +1,1 @@
+curl -X POST "http://localhost:38080/ingest-service/api/v1/ingest/sales?tags=sales" -H "X-CLIENT-ID: 6c3063e1-60bd-4b08-934f-b66d47685544" -H "X-API-KEY: d877770c-41f8-46db-bcef-78d06c5ec0e1" -H 'Content-Type: multipart/form-data' -F "file=@`pwd`/ingest.zip" --verbose -L
