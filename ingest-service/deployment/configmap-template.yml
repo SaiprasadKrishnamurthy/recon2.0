@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: "ingest-service-0.0.1-snapshot"
+  namespace: default
+data:
+  profile: "default"
+  service_name: "ingest-service"
+  server_port: "38080"
+  api_version: "v1"
+  no_of_lines_in_chunk: "5000"
+  mongo_uri: "mongodb+srv://sai:sai@cluster1.khkphay.mongodb.net/?retryWrites=true&w=majority"
+  aws_access_key_id: ""
+  aws_secret_access_key: ""
+  aws_region: "ap-south-1"
+  nats_url: "nats://nats:4222"
+  ingest_stream: "ingest_stream"
+  chunk_created_event_subject: "chunk.created.event"
+  chunk_created_event_queue: "chunk.created.event.queue"
+

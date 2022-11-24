@@ -94,15 +94,15 @@ func readConfig() {
 	viper.SetConfigName(env) // config file name without extension
 	viper.SetConfigType("yaml")
 	viper.AddConfigPath(".")
-	viper.AddConfigPath("./config/") // config file path
-	viper.AutomaticEnv()             // read value ENV variable
+	viper.AddConfigPath("./conf/") // config file path
+	viper.AutomaticEnv()           // read value ENV variable
 	viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
-
 	err := viper.ReadInConfig()
 	if err != nil {
 		fmt.Println("fatal error config file \n", err)
 		os.Exit(1)
 	}
+	fmt.Printf("Profile: %s\n", viper.GetString("profile"))
 }
 func NewServiceFactory(log *model.Log,
 	ingestService *service.IngestService,

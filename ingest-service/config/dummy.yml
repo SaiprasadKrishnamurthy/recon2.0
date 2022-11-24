@@ -1,8 +1,0 @@
-service_name: ingest-service
-server_port: 38080
-api_version: v1
-no_of_lines_in_chunk: 5000
-mongo_uri: "ADD YOUR URI"
-aws_access_key_id: "ADD YOUR KEY"
-aws_secret_access_key: "ADD YOUR KEY"
-aws_region: "ADD YOUR REGION"
