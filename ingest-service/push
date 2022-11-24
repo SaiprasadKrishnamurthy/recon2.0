@@ -1,0 +1,2 @@
+#!/bin/bash
+docker push docker.io/saiprasadkrishnamurthy/ingest-service:0.0.1-SNAPSHOT

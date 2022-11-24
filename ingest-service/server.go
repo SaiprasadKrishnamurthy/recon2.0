@@ -26,7 +26,8 @@ import (
 var logFile *os.File
 
 func init() {
-	logFile, _ = os.OpenFile("ingest-service-logs.txt", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0666)
+	os.Mkdir("logs", os.ModePerm)
+	logFile, _ = os.OpenFile("logs/ingest-service-logs.txt", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0666)
 	fmt.Println(" Setting up log file ", logFile.Name())
 }
 

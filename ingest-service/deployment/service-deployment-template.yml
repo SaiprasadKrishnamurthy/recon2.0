@@ -31,9 +31,19 @@ spec:
         - name: ingest-service
           image: docker.io/saiprasadkrishnamurthy/ingest-service:0.0.1-SNAPSHOT
           imagePullPolicy: Always
+          env:
+            - name: GIN_MODE
+              value: release
           envFrom:
             - configMapRef:
                 name: ingest-service-0.0.1-snapshot
           ports:
             - containerPort: 38080
-
+          volumeMounts:
+            - mountPath: /logs
+              name: logs-volume
+      volumes:
+        - name: logs-volume
+          hostPath:
+            path: /Users/saiprasadkrishnamurthy/logs
+            type: DirectoryOrCreate
