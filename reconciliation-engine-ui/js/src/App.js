@@ -16,6 +16,7 @@ import "./layout/layout.scss";
 import "./App.scss";
 import { Home } from "./components/Home";
 import { Docs } from "./components/Docs";
+import { RDL } from "./components/RDL";
 
 class App extends Component {
   constructor() {
@@ -93,6 +94,13 @@ class App extends Component {
         icon: "pi pi-fw pi-home",
         command: () => {
           window.location = "#/";
+        }
+      },
+      {
+        label: "RDL",
+        icon: "pi pi-fw pi-file",
+        command: () => {
+          window.location = "#/rdl";
         }
       },
       {
@@ -177,6 +185,7 @@ class App extends Component {
         <div className="layout-main">
           <Route path="/" exact component={Home} />
           <Route path="/docs" exact component={Docs} />
+          <Route path="/rdl" exact component={RDL} />
         </div>
 
         <AppFooter />

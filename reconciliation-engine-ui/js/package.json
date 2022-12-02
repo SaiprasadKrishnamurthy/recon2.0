@@ -29,6 +29,7 @@
         "react-cron-builder": "^1.0.4",
         "react-dom": "^16.8.6",
         "react-gauge-chart": "^0.4.0",
+        "react-highlight-words": "^0.18.0",
         "react-html-parser": "^2.0.2",
         "react-json-editor-ajrm": "^2.5.13",
         "react-json-ide": "^2.6.0",

@@ -8,11 +8,11 @@ import java.util.*
 data class ReconciliationSetting(
     @Id
     val id: String = UUID.randomUUID().toString(),
-    val name: String,
+    val name: String = "Recon Setting ${System.currentTimeMillis()}",
     val version: Long = System.currentTimeMillis(),
     val created: Long = System.currentTimeMillis(),
     val owner: String = "",
-    val dataSources: List<DataSource>,
-    val group: String,
-    val rulesets: List<MatchRuleSet>
+    val dataSources: MutableList<DataSource> = mutableListOf(),
+    val group: String = "",
+    val rulesets: MutableList<MatchRuleSet> = mutableListOf()
 )

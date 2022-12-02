@@ -1,0 +1,143 @@
+{
+  "id": "4f520d2e-5786-4554-90c2-ddd68d62eb04",
+  "name": "Recon Setting 1669960986392",
+  "version": 1669960986397,
+  "created": 1669960986397,
+  "owner": "",
+  "dataSources": [
+    {
+      "bucketField": "entityId",
+      "id": "sales",
+      "predicate": "name='sales' order by id"
+    },
+    {
+      "bucketField": "entityId",
+      "id": "tdsLedger",
+      "predicate": "name='tdsLedger' order by id"
+    }
+  ],
+  "group": "",
+  "rulesets": [
+    {
+      "name": "EntryChecks",
+      "type": "EntryWiseOneToOneChecks",
+      "rules": [
+        {
+          "id": "ef8c2449-9c30-4af4-a2be-17b88b24b19c",
+          "fieldChecks": null,
+          "totalsChecks": null,
+          "entriesChecks": {
+            "expression": "sales.invoiceNo == tdsLedger.invoiceNo AND valueWithinTolerance(sales.tdsOnSales, tdsLedger.tds, 1.0)"
+          },
+          "entriesOneToManyChecks": null,
+          "tagsWhenMatched": [
+            "TDS_MATCHED_BETWEEN_SALES_AND_TDS_LEDGER"
+          ],
+          "tagsWhenNotMatched": [
+            "TDS_UNMATCHED_BETWEEN_SALES_AND_TDS_LEDGER"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "EntryOneToManyChecks A",
+      "type": "EntryWiseOneToOneChecks",
+      "rules": [
+        {
+          "id": "70d87f88-9342-40b4-b7c0-44e956c40cac",
+          "fieldChecks": null,
+          "totalsChecks": {
+            "totalsBucketFields": [
+              "sales.invoiceNo",
+              "tdsLedger.invoiceNo"
+            ],
+            "totalsOnFields": [
+              "sales.tdsOnSales",
+              "tdsLedger.tds"
+            ],
+            "totalsTolerance": 1.0
+          },
+          "entriesChecks": null,
+          "entriesOneToManyChecks": null,
+          "tagsWhenMatched": [
+            "TDS_MATCHED_BETWEEN_SALES_AND_TDS_LEDGER"
+          ],
+          "tagsWhenNotMatched": [
+            "TDS_UNMATCHED_BETWEEN_SALES_AND_TDS_LEDGER"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "FieldChecks A",
+      "type": "EntryWiseOneToOneChecks",
+      "rules": [
+        {
+          "id": "e7268917-1a80-4833-ba4b-35275f812747",
+          "fieldChecks": {
+            "expression": "valueWithinTolerance(sales.tdsOnSales, 0.1 * sales.transactionAmount, 1.0)"
+          },
+          "totalsChecks": null,
+          "entriesChecks": null,
+          "entriesOneToManyChecks": null,
+          "tagsWhenMatched": [
+            "CORRECT_TDS_ON_SALES"
+          ],
+          "tagsWhenNotMatched": [
+            "INCORRECT_TDS_ON_SALES"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "FieldChecks B",
+      "type": "EntryWiseOneToOneChecks",
+      "rules": [
+        {
+          "id": "12c51403-6491-4622-883f-ba9b5e19eeaa",
+          "fieldChecks": {
+            "expression": "tdsLedger.tds > 0"
+          },
+          "totalsChecks": null,
+          "entriesChecks": null,
+          "entriesOneToManyChecks": null,
+          "tagsWhenMatched": [
+            "CORRECT_TDS_ON_TDS_LEDGER"
+          ],
+          "tagsWhenNotMatched": [
+            "INCORRECT_TDS_ON_TDS_LEDGER"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "TotalsChecks",
+      "type": "EntryWiseOneToOneChecks",
+      "rules": [
+        {
+          "id": "7921b35a-f551-444b-a3d6-58282debde84",
+          "fieldChecks": null,
+          "totalsChecks": {
+            "totalsBucketFields": [
+              "sales.invoiceNo",
+              "tdsLedger.invoiceNo"
+            ],
+            "totalsOnFields": [
+              "sales.tdsOnSales",
+              "tdsLedger.tds"
+            ],
+            "totalsTolerance": 1.0
+          },
+          "entriesChecks": null,
+          "entriesOneToManyChecks": null,
+          "tagsWhenMatched": [
+            "TDS_TOTALS_MATCHED_BETWEEN_SALES_AND_TDSLEDGER"
+          ],
+          "tagsWhenNotMatched": [
+            "TDS_TOTALS_UNMATCHED_BETWEEN_SALES_AND_TDSLEDGER"
+          ]
+        }
+      ]
+    }
+  ]
+}

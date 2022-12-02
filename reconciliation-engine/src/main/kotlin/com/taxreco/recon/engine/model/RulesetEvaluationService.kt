@@ -1,7 +1,7 @@
 package com.taxreco.recon.engine.model
 
-import com.taxreco.recon.engine.service.F
-import com.taxreco.recon.engine.service.Functions.MATCH_KEY_ATTRIBUTE
+import com.taxreco.recon.engine.util.F
+import com.taxreco.recon.engine.util.Constants.MATCH_KEY_ATTRIBUTE
 import org.mvel2.MVEL
 
 interface RulesetEvaluationService {

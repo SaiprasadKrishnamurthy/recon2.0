@@ -1,0 +1,24 @@
+DEFINE DATASOURCE sales WITH BUCKET FIELD entityId AS (name='sales' order by id),
+
+DEFINE DATASOURCE tdsLedger WITH BUCKET FIELD entityId AS (name='tdsLedger' order by id)
+
+DEFINE RULE EntryChecks OF TYPE EntryWiseOneToOneChecks AS (sales.invoiceNo == tdsLedger.invoiceNo AND valueWithinTolerance(sales.tdsOnSales, tdsLedger.tds, 1.0))
+TAGS WHEN MATCHED (TDS_MATCHED_BETWEEN_SALES_AND_TDS_LEDGER) TAGS WHEN NOT MATCHED (TDS_UNMATCHED_BETWEEN_SALES_AND_TDS_LEDGER)
+
+DEFINE RULE EntryOneToManyChecks A OF TYPE EntryWiseOneToManyChecks AS (sales.invoiceNo == tdsLedger.invoiceNo AND valueWithinTolerance(sales.tdsOnSales, tdsLedger.tds, 1.0))
+TAGS WHEN MATCHED (TDS_MATCHED_BETWEEN_SALES_AND_TDS_LEDGER) TAGS WHEN NOT MATCHED (TDS_UNMATCHED_BETWEEN_SALES_AND_TDS_LEDGER)
+
+DEFINE RULE FieldChecks A OF TYPE FieldChecks AS (valueWithinTolerance(sales.tdsOnSales, 0.1 * sales.transactionAmount, 1.0))
+TAGS WHEN MATCHED (CORRECT_TDS_ON_SALES) TAGS WHEN NOT MATCHED (INCORRECT_TDS_ON_SALES)
+
+DEFINE RULE FieldChecks B OF TYPE FieldChecks AS (tdsLedger.tds > 0)
+TAGS WHEN MATCHED (CORRECT_TDS_ON_TDS_LEDGER) TAGS WHEN NOT MATCHED (INCORRECT_TDS_ON_TDS_LEDGER)
+
+DEFINE RULE TotalsChecks OF TYPE TotalsChecks AS (sales.invoiceNo == tdsLedger.invoiceNo AND valueWithinTolerance(sales.tdsOnSales, tdsLedger.tds, 1.0))
+TAGS WHEN MATCHED (TDS_TOTALS_MATCHED_BETWEEN_SALES_AND_TDSLEDGER) TAGS WHEN NOT MATCHED (TDS_TOTALS_UNMATCHED_BETWEEN_SALES_AND_TDSLEDGER)
+
+
+
+
+
+

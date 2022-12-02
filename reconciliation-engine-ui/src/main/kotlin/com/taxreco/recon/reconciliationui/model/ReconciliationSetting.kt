@@ -7,12 +7,12 @@ import java.util.*
 @Document("reconciliationSetting")
 data class ReconciliationSetting(
     @Id
-    val id: String = UUID.randomUUID().toString(),
-    val name: String,
-    val version: Long = System.currentTimeMillis(),
-    val created: Long = System.currentTimeMillis(),
-    val owner: String = "",
-    val dataSources: List<DataSource>,
-    val group: String,
-    val rulesets: List<MatchRuleSet>
+    var id: String = UUID.randomUUID().toString(),
+    var name: String = "",
+    var version: Long = System.currentTimeMillis(),
+    var created: Long = System.currentTimeMillis(),
+    var owner: String = "",
+    var dataSources: MutableList<DataSource> = mutableListOf(),
+    var group: String = "",
+    var rulesets: MutableList<MatchRuleSet> = mutableListOf()
 )

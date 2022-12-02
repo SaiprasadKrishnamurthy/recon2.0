@@ -3,7 +3,7 @@ package com.taxreco.recon.engine.repository
 import com.taxreco.recon.engine.model.DataSet
 import com.taxreco.recon.engine.model.MatchRecord
 import com.taxreco.recon.engine.model.MatchResult
-import com.taxreco.recon.engine.service.Functions
+import com.taxreco.recon.engine.util.Constants
 import org.springframework.data.mongodb.core.MongoTemplate
 import org.springframework.data.mongodb.core.query.Criteria
 import org.springframework.data.mongodb.core.query.Query
@@ -44,7 +44,7 @@ class MatchRecordRepository(private val mongoTemplate: MongoTemplate) {
         )
         val records = mongoTemplate.find(query, MatchRecord::class.java)
         val matches = records.groupBy { it.datasource }
-            .mapValues { it.value.map { v -> v.record.filter { a -> a.key != Functions.MATCH_KEY_ATTRIBUTE } } }
+            .mapValues { it.value.map { v -> v.record.filter { a -> a.key != Constants.MATCH_KEY_ATTRIBUTE } } }
         val matchTags = records.flatMap { it.tags }.distinct()
         return MatchResult(
             jobId = jobId,

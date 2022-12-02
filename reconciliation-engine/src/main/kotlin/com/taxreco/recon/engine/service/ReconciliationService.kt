@@ -3,7 +3,7 @@ package com.taxreco.recon.engine.service
 import com.taxreco.recon.engine.config.TenantContext
 import com.taxreco.recon.engine.model.*
 import com.taxreco.recon.engine.repository.*
-import com.taxreco.recon.engine.service.Functions.MATCH_KEY_ATTRIBUTE
+import com.taxreco.recon.engine.util.Constants.MATCH_KEY_ATTRIBUTE
 import org.slf4j.LoggerFactory
 import org.springframework.context.ApplicationContext
 import org.springframework.scheduling.annotation.Async

@@ -4,6 +4,7 @@ import com.taxreco.recon.engine.model.MatchRuleSet
 import com.taxreco.recon.engine.model.ReconciliationContext
 import com.taxreco.recon.engine.model.RulesetEvaluationService
 import com.taxreco.recon.engine.model.RulesetType
+import com.taxreco.recon.engine.util.Constants
 import org.springframework.stereotype.Service
 import java.util.*
 
@@ -16,19 +17,20 @@ class FieldChecksService : RulesetEvaluationService {
     ) {
         if (supportedRulesetType() == ruleSet.type) {
             ruleSet.rules.forEach { rule ->
-                val tokens = rule.fieldChecks!!.expression!!.split("[\\p{Punct}\\s&&[^_]]+".toRegex())
+                val tokens = rule.fieldChecks!!.expression.split("[\\p{Punct}\\s&&[^_]]+".toRegex())
                 val datasources = tokens
                     .filter { reconciliationContext.reconciliationSetting.dataSources.map { d -> d.id }.contains(it) }
                     .distinct()
 
+                val _rule = rule.copy()
                 reconciliationContext.transactionRecords[datasources[0]]?.forEach { rec ->
                     try {
-                        val result = evalExpression(rule.fieldChecks.expression, rec.name, rec.attrs)
+                        val result = evalExpression(_rule.fieldChecks!!.expression, rec.name, rec.attrs)
                         if (result) {
                             rec.matchTags.addAll(rule.tagsWhenMatched)
-                            rec.attrs[Functions.MATCH_KEY_ATTRIBUTE] = UUID.randomUUID().toString()
+                            rec.attrs[Constants.MATCH_KEY_ATTRIBUTE] = UUID.randomUUID().toString()
                         } else {
-                            rec.attrs[Functions.MATCH_KEY_ATTRIBUTE] = "$" + UUID.randomUUID().toString()
+                            rec.attrs[Constants.MATCH_KEY_ATTRIBUTE] = "$" + UUID.randomUUID().toString()
                             rec.matchTags.addAll(rule.tagsWhenNotMatched)
                         }
                     } catch (ex: Exception) {

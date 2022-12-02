@@ -1,7 +1,7 @@
 package com.taxreco.recon.engine.service
 
 import com.taxreco.recon.engine.model.*
-import com.taxreco.recon.engine.service.Functions.MATCH_KEY_ATTRIBUTE
+import com.taxreco.recon.engine.util.Constants.MATCH_KEY_ATTRIBUTE
 import org.springframework.stereotype.Service
 import java.util.*
 import kotlin.math.abs
@@ -52,6 +52,7 @@ class TotalsWiseComparisonService : RulesetEvaluationService {
 
                 // Check groups.
                 groupsA.forEach { a ->
+                    val _rule = rule.copy()
                     val elementsA = groupsA[a.key]
                     val elementsB = groupsB[a.key]
                     val totalOnFieldA = totalsChecks.totalsOnFields[0].substringAfter(".")
@@ -63,7 +64,7 @@ class TotalsWiseComparisonService : RulesetEvaluationService {
                         it.attrs[totalOnFieldB]?.toString()?.toDouble() ?: 0.0
                     }
                     var matchKey = UUID.randomUUID().toString()
-                    if (sumA != null && sumB != null && abs(sumA - sumB) <= rule.totalsChecks.totalsTolerance) {
+                    if (sumA != null && sumB != null && abs(sumA - sumB) <= _rule.totalsChecks!!.totalsTolerance) {
                         elementsA.filter {
                             !it.attrs.containsKey(MATCH_KEY_ATTRIBUTE) || it.attrs[MATCH_KEY_ATTRIBUTE].toString()
                                 .contains("$")

@@ -4,11 +4,11 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class Rule(
-    val id: String,
-    val fieldChecks: FieldChecks? = null,
-    val totalsChecks: TotalsChecks? = null,
-    val entriesChecks: EntriesChecks? = null,
-    val entriesOneToManyChecks: EntriesOneToManyChecks? = null,
-    val tagsWhenMatched: List<String>,
-    val tagsWhenNotMatched: List<String>
+    var id: String,
+    var fieldChecks: FieldChecks? = null,
+    var totalsChecks: TotalsChecks? = null,
+    var entriesChecks: EntriesChecks? = null,
+    var entriesOneToManyChecks: EntriesOneToManyChecks? = null,
+    var tagsWhenMatched: MutableList<String>,
+    var tagsWhenNotMatched: MutableList<String>
 )

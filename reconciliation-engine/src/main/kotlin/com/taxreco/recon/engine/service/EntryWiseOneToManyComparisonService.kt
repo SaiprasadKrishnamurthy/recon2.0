@@ -1,7 +1,7 @@
 package com.taxreco.recon.engine.service
 
 import com.taxreco.recon.engine.model.*
-import com.taxreco.recon.engine.service.Functions.MATCH_KEY_ATTRIBUTE
+import com.taxreco.recon.engine.util.Constants.MATCH_KEY_ATTRIBUTE
 import org.springframework.stereotype.Service
 import java.util.*
 import kotlin.math.abs

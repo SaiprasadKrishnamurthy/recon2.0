@@ -27,7 +27,7 @@
         {
           "id": "tds_value_checks_on_sales_and_tds_ledger",
           "entriesChecks": {
-            "expression": "sales.invoiceNo == tdsLedger.invoiceNo AND valueWithinTolerance(sales.tdsOnSales, tdsLedger.tds, 1.0)"
+              "expression": "sales.invoiceNo == tdsLedger.invoiceNo AND valueWithinTolerance(sales.tdsOnSales, tdsLedger.tds, 1.0)"
           },
           "tagsWhenMatched": [
             "TDS_MATCHED_BETWEEN_SALES_AND_TDS_LEDGER"
