@@ -1,4 +1,4 @@
-DEFINE DATASOURCE sales WITH BUCKET FIELD entityId AS (name='sales' order by id),
+DEFINE DATASOURCE sales WITH BUCKET FIELD entityId AS (name='sales' order by id)
 
 DEFINE DATASOURCE tdsLedger WITH BUCKET FIELD entityId AS (name='tdsLedger' order by id)
 

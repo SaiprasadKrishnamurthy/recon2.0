@@ -17,6 +17,31 @@ class F {
 
     fun contains(a: String, b: String) = a.lowercase().trim().contains(b.lowercase().trim())
 
+    fun removeAllSymbols(a: String): String {
+        return a.replace("[^A-Za-z0-9 ]".toRegex(), "")
+    }
+
+    fun removeSymbols(a: String, list: List<Char>): String {
+        return a.filter { !list.contains(it) }
+    }
+
+    fun validNumber(a: String): Boolean {
+        return try {
+            a.toDouble()
+            true
+        } catch (ex: Exception) {
+            false
+        }
+    }
+
+    fun validNonZeroNumber(a: String): Boolean {
+        return try {
+            return a.toDouble() > 0
+        } catch (ex: Exception) {
+            false
+        }
+    }
+
     fun containsAny(a: String, b: String): Boolean {
         val x = a.lowercase().split("[\\p{Punct}\\s]+".toRegex())
         val y = b.lowercase().split("[\\p{Punct}\\s]+".toRegex())

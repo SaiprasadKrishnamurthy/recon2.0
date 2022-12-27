@@ -1,6 +1,9 @@
 package handler
 
 import (
+	"database/sql"
+
+	_ "github.com/lib/pq"
 	"github.com/nats-io/nats.go"
 	"github.com/saiprasadkrishnamurthy/ingest-service/model"
 	"github.com/saiprasadkrishnamurthy/ingest-service/service"
@@ -14,4 +17,5 @@ type ServiceFactory struct {
 	MongoClient   *mongo.Client
 	S3Manager     *storage.S3Manager
 	Nats          *nats.Conn
+	DB            *sql.DB
 }

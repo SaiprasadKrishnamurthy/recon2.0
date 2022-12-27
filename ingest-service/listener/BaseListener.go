@@ -1,6 +1,8 @@
 package listener
 
 import (
+	"database/sql"
+
 	"github.com/nats-io/nats.go"
 	"github.com/saiprasadkrishnamurthy/ingest-service/model"
 	"github.com/saiprasadkrishnamurthy/ingest-service/storage"
@@ -14,6 +16,7 @@ type BaseListener struct {
 	Log         *model.Log
 	S3Manager   *storage.S3Manager
 	MongoClient *mongo.Client
+	DB          *sql.DB
 }
 
 // OnMessage on message function of all the listeners.
@@ -22,8 +25,8 @@ func (l *BaseListener) OnMessage(subject string, queue string, msgHandler nats.M
 }
 
 // InitializeAllListeners initializes all listeners.
-func InitializeAllListeners(nats *nats.Conn, log *model.Log, mongo *mongo.Client, s3 *storage.S3Manager) {
-	baseListener := &BaseListener{NatsConn: nats, Log: log, S3Manager: s3, MongoClient: mongo}
+func InitializeAllListeners(nats *nats.Conn, log *model.Log, mongo *mongo.Client, s3 *storage.S3Manager, db *sql.DB) {
+	baseListener := &BaseListener{NatsConn: nats, Log: log, S3Manager: s3, MongoClient: mongo, DB: db}
 	initChunkCreatedEventListener(baseListener)
 }
 

@@ -1,7 +1,11 @@
 package com.taxreco.recon.engine.config
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import com.taxreco.recon.engine.model.*
+import com.github.vincentrussell.query.mongodb.sql.converter.QueryConverter
+import com.taxreco.recon.engine.model.MatchRecord
+import com.taxreco.recon.engine.model.ReconciliationSetting
+import com.taxreco.recon.engine.model.RecordId
+import com.taxreco.recon.engine.model.TransactionRecord
 import com.taxreco.recon.engine.repository.MatchRecordRepository
 import com.taxreco.recon.engine.service.NatsPublisher
 import com.taxreco.recon.engine.service.ReconciliationService
@@ -11,6 +15,8 @@ import org.springframework.boot.CommandLineRunner
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.data.mongodb.core.MongoTemplate
+import java.io.ByteArrayOutputStream
+
 
 @Configuration
 class Bootstrap {
@@ -25,23 +31,31 @@ class Bootstrap {
         matchRecordRepository: MatchRecordRepository,
         natsPublisher: NatsPublisher
     ) = CommandLineRunner {
-        mongoSample(mongoTemplate)
+        //mongoSample(mongoTemplate)
 
-        repeat((0 until 1).count()) {
-            println(reconTriggerSubject)
-            println(
-                jacksonObjectMapper().writeValueAsString(
-                    ReconciliationTriggeredEvent(
-                        tenantId = "taxreco",
-                        reconSettingName = "Settings 1",
-                        reconSettingVersion = 1,
-                        streamResults = true,
-                        jobId = "1",
+        val queryConverter = QueryConverter.Builder()
+            .sqlString("select * from transactionRecord a inner join transactionRecord1 as b on a.invoiceNo = b.invoiceNo")
+            .build()
 
-                        )
-                )
-            )
-        }
+        val out = ByteArrayOutputStream()
+        queryConverter.write(out)
+        println(out)
+
+//        repeat((0 until 1).count()) {
+//            println(reconTriggerSubject)
+//            println(
+//                jacksonObjectMapper().writeValueAsString(
+//                    ReconciliationTriggeredEvent(
+//                        tenantId = "taxreco",
+//                        reconSettingName = "Settings 1",
+//                        reconSettingVersion = 1,
+//                        streamResults = true,
+//                        jobId = "1",
+//
+//                        )
+//                )
+//            )
+//        }
     }
 
     private fun mongoSample(mongoTemplate: MongoTemplate) {
@@ -121,11 +135,11 @@ class Bootstrap {
         tdsLedger.forEach { mongoTemplate.save(it) }
         t6as.forEach { mongoTemplate.save(it) }
 
-            val reconciliationSetting =
-                jacksonObjectMapper().readValue(
-                    Bootstrap::class.java.classLoader.getResourceAsStream("ReconSettings.json"),
-                    ReconciliationSetting::class.java
-                )
-            mongoTemplate.save(reconciliationSetting)
+        val reconciliationSetting =
+            jacksonObjectMapper().readValue(
+                Bootstrap::class.java.classLoader.getResourceAsStream("ReconSettings.json"),
+                ReconciliationSetting::class.java
+            )
+        mongoTemplate.save(reconciliationSetting)
     }
 }
