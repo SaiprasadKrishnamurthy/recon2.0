@@ -1,0 +1,22 @@
+{
+  "idField": "Tran No",
+  "keyFields": [
+    "Pan No."
+  ],
+  "tags": [
+    "salesdata"
+  ],
+  "fieldDefinitions": {
+    "Tran No": "string",
+    "Tran Type": "string",
+    "Pan No.": "string",
+    "TAN No.": "string",
+    "Name of the Party": "string",
+    "Date of Payment / Credit": "date",
+    "Taxable Value of Invoice": "number",
+    "Amount Paid / Credited": "number",
+    "TDS Rate": "number",
+    "TDS": "number",
+    "Customer Code": "string"
+  }
+}
