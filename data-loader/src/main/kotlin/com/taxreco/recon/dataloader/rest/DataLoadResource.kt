@@ -42,6 +42,7 @@ class DataLoadResource(
             mappingDefinitions.replace("\\r", "").replace("\\n", ""),
             DataDefinitions::class.java
         )
+        definitions.tags = tags.split(",").map { it.trim() }
         val jobId = UUID.randomUUID().toString()
         val zipDir = File(dataLoaderWorkDir + File.separator + jobId)
         FileUtils.forceMkdir(zipDir)

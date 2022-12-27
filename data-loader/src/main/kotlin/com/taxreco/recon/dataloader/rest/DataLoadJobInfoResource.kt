@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
+import java.util.*
 
 @RequestMapping("/api/v1")
 @RestController
@@ -22,7 +23,12 @@ class DataLoadJobInfoResource(
     }
 
     @GetMapping("/job/{jobId}", produces = [MediaType.APPLICATION_JSON_VALUE])
-    fun job(@PathVariable("jobId") jobId: String): JobDetailedView {
-        return jobInfoRepository.findJobDetail(apiUser, jobId)
+    fun job(@PathVariable("jobId") jobId: String): JobDetailedView? {
+        val jd = jobInfoRepository.findJobDetail(apiUser, jobId)
+        if (jd == null) {
+            throw MissingResourceException("", "", "")
+        } else {
+            return jd
+        }
     }
 }

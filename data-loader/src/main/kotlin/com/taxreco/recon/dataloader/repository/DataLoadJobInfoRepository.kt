@@ -91,7 +91,7 @@ class DataLoadJobInfoRepository(private val jdbcTemplate: JdbcTemplate) {
         }
     }
 
-    fun findJobDetail(apiUser: ApiUser, jobId: String): JobDetailedView {
+    fun findJobDetail(apiUser: ApiUser, jobId: String): JobDetailedView? {
         val sql = """
             select * from data_load_job_info where job_id='${jobId}' and tenant='${apiUser.tenant}'
         """.trimIndent()
@@ -115,6 +115,9 @@ class DataLoadJobInfoRepository(private val jdbcTemplate: JdbcTemplate) {
             jdv.name = name
             jdv.chunks.add(ChunkInfo(chunkName, DataLoadJobStatus.valueOf(status), error))
         }
-        return jdv
+        return if (jdv.chunks.isEmpty())
+            null
+        else
+            jdv
     }
 }

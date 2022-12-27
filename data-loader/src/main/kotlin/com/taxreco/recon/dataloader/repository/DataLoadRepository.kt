@@ -44,6 +44,7 @@ class DataLoadRepository(
         }.joinToString(", ")
         val createTable = """
             create table if not exists ${event.tenant}.${tableName}(
+               tags VARCHAR [],
                $colDefs
             )
         """.trimIndent()
@@ -93,18 +94,23 @@ class DataLoadRepository(
         val iterator: MappingIterator<Map<String, String>> = mapper.readerFor(MutableMap::class.java)
             .with(schema)
             .readValues(file)
-        val keys = event.dataDefinitions.fieldDefinitions.keys.toList()
+        val keys = event.dataDefinitions.fieldDefinitions.keys.toMutableList()
+        keys.add(0, "tags")
+
         val keysNormalised = event.dataDefinitions.fieldDefinitions.keys.map { normalise(it) }.toList()
         val placeHolders = event.dataDefinitions.fieldDefinitions.keys.map { "?" }
 
         val sql = """
-            insert into ${event.tenant}.${event.name} (${keysNormalised.joinToString(",")}) values (${
+            insert into ${event.tenant}.${event.name} (tags,${keysNormalised.joinToString(",")}) values (
+                ?,
+                ${
             placeHolders.joinToString(
                 ","
             )
         }) 
         ON CONFLICT ON CONSTRAINT ${event.name}_pkey  
         DO UPDATE SET 
+        tags=excluded.tags,
         ${keysNormalised.joinToString(", ") { "$it=excluded.$it" }}
         """.trimIndent()
 
@@ -124,18 +130,24 @@ class DataLoadRepository(
                 override fun setValues(ps: PreparedStatement, i: Int) {
                     val entry = rows[i]
                     keys.forEachIndexed { colidx, key ->
-                        if (event.dataDefinitions.fieldDefinitions[key] == FieldType.date) {
-                            if (entry[key]?.toString() != null) {
-                                ps.setDate(colidx + 1, Date.valueOf(DateUtil.parseDate(entry[key].toString())))
-                            } else {
-                                ps.setDate(colidx + 1, null)
-                            }
-                        } else if (event.dataDefinitions.fieldDefinitions[key] == FieldType.number) {
-                            ps.setDouble(colidx + 1, entry[key].toString().trim().toDoubleOrNull() ?: 0.0)
-                        } else if (event.dataDefinitions.fieldDefinitions[key] == FieldType.boolean) {
-                            ps.setBoolean(colidx + 1, entry[key]?.toString()?.toBoolean() ?: false)
+                        if (colidx == 0) {
+                            // Add tags here.
+                            val array = ps.connection.createArrayOf("TEXT", event.dataDefinitions.tags.toTypedArray())
+                            ps.setArray(colidx + 1, array)
                         } else {
-                            ps.setString(colidx + 1, entry[key]?.toString())
+                            if (event.dataDefinitions.fieldDefinitions[key] == FieldType.date) {
+                                if (entry[key]?.toString() != null) {
+                                    ps.setDate(colidx + 1, Date.valueOf(DateUtil.parseDate(entry[key].toString())))
+                                } else {
+                                    ps.setDate(colidx + 1, null)
+                                }
+                            } else if (event.dataDefinitions.fieldDefinitions[key] == FieldType.number) {
+                                ps.setDouble(colidx + 1, entry[key].toString().trim().toDoubleOrNull() ?: 0.0)
+                            } else if (event.dataDefinitions.fieldDefinitions[key] == FieldType.boolean) {
+                                ps.setBoolean(colidx + 1, entry[key]?.toString()?.toBoolean() ?: false)
+                            } else {
+                                ps.setString(colidx + 1, entry[key]?.toString())
+                            }
                         }
                     }
                 }

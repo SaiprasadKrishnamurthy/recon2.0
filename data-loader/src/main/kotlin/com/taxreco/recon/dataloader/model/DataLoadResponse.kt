@@ -1,7 +1,9 @@
 package com.taxreco.recon.dataloader.model
 
+import com.fasterxml.jackson.annotation.JsonInclude
 import java.util.*
 
+@JsonInclude(JsonInclude.Include.NON_EMPTY)
 data class DataLoadResponse(
     val jobId: String = UUID.randomUUID().toString(),
     val name: String,

@@ -16,6 +16,7 @@ data class DataLoadRequest(
 data class DataDefinitions(
     val idField: String? = null,
     val keyFields: List<String> = emptyList(),
+    var tags: List<String> = emptyList(),
     val fieldDefinitions: Map<String, FieldType>
 )
 
