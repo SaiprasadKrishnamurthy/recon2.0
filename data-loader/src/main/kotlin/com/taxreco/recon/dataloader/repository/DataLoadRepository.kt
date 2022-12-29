@@ -4,12 +4,11 @@ import com.fasterxml.jackson.databind.MappingIterator
 import com.fasterxml.jackson.dataformat.csv.CsvMapper
 import com.fasterxml.jackson.dataformat.csv.CsvSchema
 import com.taxreco.recon.dataloader.ftp.S3Manager
-import com.taxreco.recon.dataloader.model.ApiUser
-import com.taxreco.recon.dataloader.model.DataDefinitions
-import com.taxreco.recon.dataloader.model.DataLoadEvent
-import com.taxreco.recon.dataloader.model.FieldType
+import com.taxreco.recon.dataloader.model.*
 import com.taxreco.recon.dataloader.util.DateUtil
+import com.taxreco.recon.dataloader.util.ExpressionUtil
 import org.apache.commons.io.FileUtils
+import org.apache.commons.lang3.math.NumberUtils
 import org.slf4j.LoggerFactory
 import org.springframework.jdbc.core.BatchPreparedStatementSetter
 import org.springframework.jdbc.core.JdbcTemplate
@@ -23,7 +22,8 @@ import java.util.*
 @Repository
 class DataLoadRepository(
     private val jdbcTemplate: JdbcTemplate,
-    private val s3Manager: S3Manager
+    private val s3Manager: S3Manager,
+    private val dataLoadJobErrorsRepository: DataLoadJobErrorsRepository
 ) {
 
     companion object {
@@ -34,7 +34,7 @@ class DataLoadRepository(
 
     fun setupTables(event: DataLoadEvent) {
         val tableName = event.name
-        val colDefs = event.dataDefinitions.fieldDefinitions.map { fd ->
+        val colDefs = event.dataDefinitions.definitions.map { fd ->
             val fieldName = normalise(fd.key)
             if (fd.key == event.dataDefinitions.idField) {
                 fieldName + " " + fd.value.dbType + " primary key"
@@ -94,11 +94,11 @@ class DataLoadRepository(
         val iterator: MappingIterator<Map<String, String>> = mapper.readerFor(MutableMap::class.java)
             .with(schema)
             .readValues(file)
-        val keys = event.dataDefinitions.fieldDefinitions.keys.toMutableList()
+        val keys = event.dataDefinitions.definitions.keys.toMutableList()
         keys.add(0, "tags")
 
-        val keysNormalised = event.dataDefinitions.fieldDefinitions.keys.map { normalise(it) }.toList()
-        val placeHolders = event.dataDefinitions.fieldDefinitions.keys.map { "?" }
+        val keysNormalised = event.dataDefinitions.definitions.keys.map { normalise(it) }.toList()
+        val placeHolders = event.dataDefinitions.definitions.keys.map { "?" }
 
         val sql = """
             insert into ${event.tenant}.${event.name} (tags,${keysNormalised.joinToString(",")}) values (
@@ -115,10 +115,62 @@ class DataLoadRepository(
         """.trimIndent()
 
         val rows = mutableListOf<Map<String, Any?>>()
-        iterator.forEach { rows.add(it) }
+        val errorRows = mutableListOf<ErrorRow>()
+        iterator.forEach {
+            val m = it.toMutableMap() as MutableMap<String, Any?>
+            event.dataDefinitions.transformations.forEach { trans ->
+                try {
+                    if (ExpressionUtil.evaluate(trans.value.precondition!!, mapOf("record" to m))) {
+                        val transformed = ExpressionUtil.evaluateToObj(trans.value.function, mapOf("record" to m))
+                        if (transformed != null) {
+                            m[trans.key.trim()] = transformed
+                        } else {
+                            m[trans.key.trim()] = trans.value.defaultValue
+                        }
+                    }
+                } catch (ex: Exception) {
+                    m[trans.key.trim()] = trans.value.defaultValue
+                }
+            }
 
-        if (event.dataDefinitions.idField != null) {
-            rows.sortBy { it[event.dataDefinitions.idField].toString() }
+            // Default validation.
+            val errors = mutableListOf<String>()
+            event.dataDefinitions.definitions.forEach { fd ->
+                val element = m[fd.key]
+                val dt = fd.value
+                if (element != null) {
+                    if (dt == FieldType.number || dt == FieldType.long) {
+                        if (!NumberUtils.isCreatable(element.toString().trim())) {
+                            errors.add("$element is not a valid number.")
+                        }
+                    } else if (dt == FieldType.date) {
+                        if (DateUtil.parseDateOrNull(element.toString().trim()) == null) {
+                            errors.add("$element is not a valid date.")
+                        }
+                    } else if (dt == FieldType.boolean) {
+                        if (element.toString().trim().equals("true", false) || element.toString().trim()
+                                .equals("false", false)
+                        ) {
+                            errors.add("$element is not a valid boolean (only true or false are allowed).")
+                        }
+                    }
+                }
+            }
+            // User Defined validation.
+            event.dataDefinitions.validations.forEach { v ->
+                if (!ExpressionUtil.evaluate(v.rule, mapOf("record" to m))) {
+                    errors.add(v.errorMessageIfRuleFails)
+                }
+            }
+            if (errors.isEmpty()) {
+                rows.add(m)
+            } else {
+                errorRows.add(ErrorRow(m, errors))
+            }
+        }
+
+        if (errorRows.isNotEmpty()) {
+            dataLoadJobErrorsRepository.save(event.jobId, event.name, event.chunkName, event.apiUser, errorRows)
         }
 
         try {
@@ -132,18 +184,19 @@ class DataLoadRepository(
                     keys.forEachIndexed { colidx, key ->
                         if (colidx == 0) {
                             // Add tags here.
-                            val array = ps.connection.createArrayOf("TEXT", event.dataDefinitions.tags.toTypedArray())
+                            val array =
+                                ps.connection.createArrayOf("TEXT", event.dataDefinitions.tags.toTypedArray())
                             ps.setArray(colidx + 1, array)
                         } else {
-                            if (event.dataDefinitions.fieldDefinitions[key] == FieldType.date) {
+                            if (event.dataDefinitions.definitions[key] == FieldType.date) {
                                 if (entry[key]?.toString() != null) {
                                     ps.setDate(colidx + 1, Date.valueOf(DateUtil.parseDate(entry[key].toString())))
                                 } else {
                                     ps.setDate(colidx + 1, null)
                                 }
-                            } else if (event.dataDefinitions.fieldDefinitions[key] == FieldType.number) {
+                            } else if (event.dataDefinitions.definitions[key] == FieldType.number) {
                                 ps.setDouble(colidx + 1, entry[key].toString().trim().toDoubleOrNull() ?: 0.0)
-                            } else if (event.dataDefinitions.fieldDefinitions[key] == FieldType.boolean) {
+                            } else if (event.dataDefinitions.definitions[key] == FieldType.boolean) {
                                 ps.setBoolean(colidx + 1, entry[key]?.toString()?.toBoolean() ?: false)
                             } else {
                                 ps.setString(colidx + 1, entry[key]?.toString())

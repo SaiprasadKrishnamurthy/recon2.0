@@ -17,8 +17,17 @@ data class DataDefinitions(
     val idField: String? = null,
     val keyFields: List<String> = emptyList(),
     var tags: List<String> = emptyList(),
-    val fieldDefinitions: Map<String, FieldType>
+    val definitions: Map<String, FieldType>,
+    val transformations: Map<String, DataTransformation> = emptyMap(),
+    val validations: List<ValidationRule> = emptyList()
 )
+
+data class ValidationRule(val rule: String, val errorMessageIfRuleFails: String)
+
+@JsonInclude(JsonInclude.Include.NON_EMPTY)
+data class DataTransformation(val precondition: String?, val function: String, val defaultValue: String?)
+
+data class ErrorRow(val row: Map<String, Any?>, val errors: List<String>)
 
 enum class FieldType(val dbType: String) {
     number("decimal"),

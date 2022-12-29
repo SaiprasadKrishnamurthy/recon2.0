@@ -6,7 +6,7 @@
   "tags": [
     "salesdata"
   ],
-  "fieldDefinitions": {
+  "definitions": {
     "Tran No": "string",
     "Tran Type": "string",
     "Pan No.": "string",
@@ -18,5 +18,18 @@
     "TDS Rate": "number",
     "TDS": "number",
     "Customer Code": "string"
-  }
+  },
+  "transformations": {
+    "TDS Rate": {
+      "precondition": "isPresent(record['TDS Rate'])",
+      "function": "round((record['TDS']/record['Taxable Value of Invoice']) * 100.0)",
+      "defaultValue": ""
+    }
+  },
+  "validations": [
+    {
+      "rule": "isValidNumber(record['TDS Rate'])",
+      "errorMessageIfRuleFails": "Invalid TDS rate"
+    }
+  ]
 }

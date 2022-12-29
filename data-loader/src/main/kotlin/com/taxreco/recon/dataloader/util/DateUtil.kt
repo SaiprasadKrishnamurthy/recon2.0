@@ -72,6 +72,14 @@ object DateUtil {
         throw IllegalArgumentException("Invalid Date: $input")
     }
 
+    fun parseDateOrNull(input: String): LocalDate? {
+        return try {
+            parseDate(input)
+        } catch (ex: Exception) {
+            null
+        }
+    }
+
     fun getPrevAndCurrPeriods(start: LocalDate): Pair<Pair<LocalDate, LocalDate>, Pair<LocalDate, LocalDate>> {
         val startPrev = start.year - 1
         val startCurrent = start.year

@@ -1,6 +1,8 @@
 {
   "idfield": "Tran No",
-  "keyfields": ["Pan No."],
+  "keyfields": [
+    "Pan No."
+  ],
   "definitions": {
     "Tran No": "string",
     "Tran Type": "string",
@@ -13,5 +15,12 @@
     "TDS Rate": "number",
     "TDS": "number",
     "Customer Code": "string"
+  },
+  "transformations": {
+    "TDS Rate": {
+      "precondition": "exists(TDS Rate)",
+      "function": "TDS/Taxable Value of Invoice",
+      "defaultValue": ""
+    }
   }
 }
