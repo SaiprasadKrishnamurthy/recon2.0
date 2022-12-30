@@ -28,7 +28,7 @@
   },
   "validations": [
     {
-      "rule": "isValidNumber(record['TDS Rate'])",
+      "rule": "record['TDS Rate'] >= 2",
       "errorMessageIfRuleFails": "Invalid TDS rate"
     }
   ]
